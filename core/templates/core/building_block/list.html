@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Building Blocks{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold">Building Blocks</h1>
+  <a href="{% url 'core:building_block_create' %}" class="btn btn-primary btn-sm">New</a>
+</div>
+
+<div class="overflow-x-auto">
+  <table class="table table-zebra w-full">
+    <thead>
+      <tr>
+        <th>Lang</th>
+        <th>Content</th>
+        <th>Usage</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for obj in building_blocks %}
+      <tr>
+        <td><span class="badge badge-outline font-mono">{{ obj.language_code }}</span></td>
+        <td class="max-w-xs truncate">{{ obj.content }}</td>
+        <td class="max-w-xs truncate">{{ obj.usage }}</td>
+        <td class="text-right whitespace-nowrap">
+          <a href="{% url 'core:building_block_detail' obj.pk %}" class="btn btn-xs btn-ghost">View</a>
+          <a href="{% url 'core:building_block_update' obj.pk %}" class="btn btn-xs btn-ghost">Edit</a>
+          <a href="{% url 'core:building_block_delete' obj.pk %}" class="btn btn-xs btn-ghost text-error">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="text-center text-base-content/50 py-8">No entries yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
