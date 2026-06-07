@@ -12,5 +12,7 @@ class BuildingBlock(models.Model):
     language_code = models.CharField(max_length=3, validators=[language_code_validator])
     usage = models.TextField()
 
+    sentences = models.ManyToManyField('Sentence', blank=True, related_name='building_blocks')
+
     def __str__(self):
         return f"[{self.language_code}] {self.content[:50]}"

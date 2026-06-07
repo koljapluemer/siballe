@@ -30,5 +30,36 @@
       </div>
     </div>
   </div>
+
+  <div class="flex items-center justify-between mt-6 mb-2">
+    <h2 class="text-lg font-semibold">Sentences</h2>
+    <a href="{% url 'core:sentence_create' obj.pk %}" class="btn btn-primary btn-sm">+ Add</a>
+  </div>
+
+  {% with sentences=obj.sentences.all %}
+  {% if sentences %}
+  <div class="flex flex-col gap-2">
+    {% for s in sentences %}
+    <div class="card bg-base-100 shadow-sm">
+      <div class="card-body py-3 px-4 gap-1">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="badge badge-outline font-mono">{{ s.language_code }}</span>
+            <p class="truncate text-sm">{{ s.content }}</p>
+          </div>
+          <div class="flex gap-1 shrink-0">
+            <a href="{% url 'core:sentence_update' obj.pk s.pk %}" class="btn btn-ghost btn-xs">Edit</a>
+            <a href="{% url 'core:sentence_delete' obj.pk s.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
+          </div>
+        </div>
+        {% if s.usage %}<p class="text-xs text-base-content/60">{{ s.usage }}</p>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-sm text-base-content/50">No sentences yet.</p>
+  {% endif %}
+  {% endwith %}
 </div>
 {% endblock %}
