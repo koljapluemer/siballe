@@ -12,6 +12,7 @@
   <table class="table table-zebra w-full">
     <thead>
       <tr>
+        <th></th>
         <th>Lang</th>
         <th>Content</th>
         <th>Usage</th>
@@ -21,6 +22,11 @@
     <tbody>
       {% for obj in building_blocks %}
       <tr>
+        <td class="w-8">
+          <button class="btn btn-xs btn-ghost favorite-btn" data-bb-id="{{ obj.pk }}" title="Favorite">
+            <i data-lucide="star" class="w-4 h-4"></i>
+          </button>
+        </td>
         <td><span class="badge badge-outline font-mono">{{ obj.language_code }}</span></td>
         <td class="max-w-xs truncate">{{ obj.content }}</td>
         <td class="max-w-xs truncate">{{ obj.usage }}</td>
@@ -31,9 +37,65 @@
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="4" class="text-center text-base-content/50 py-8">No entries yet.</td></tr>
+      <tr><td colspan="5" class="text-center text-base-content/50 py-8">No entries yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  .favorite-btn svg { stroke: currentColor; fill: none; transition: fill 0.15s, color 0.15s; }
+  .favorite-btn.favorited svg { fill: oklch(var(--wa)); color: oklch(var(--wa)); }
+</style>
+<script>
+  const DB_NAME = 'siballe', STORE = 'bb_favorites';
+
+  function openDB() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open(DB_NAME, 1);
+      r.onupgradeneeded = e => e.target.result.createObjectStore(STORE);
+      r.onsuccess = e => res(e.target.result);
+      r.onerror = e => rej(e.target.error);
+    });
+  }
+
+  function getFavoriteIds(db) {
+    return new Promise((res, rej) => {
+      const req = db.transaction(STORE, 'readonly').objectStore(STORE).getAllKeys();
+      req.onsuccess = () => res(new Set(req.result));
+      req.onerror = e => rej(e.target.error);
+    });
+  }
+
+  function toggleFavorite(db, id) {
+    return new Promise((res, rej) => {
+      const store = db.transaction(STORE, 'readwrite').objectStore(STORE);
+      const get = store.get(id);
+      get.onsuccess = () => {
+        const exists = get.result !== undefined;
+        const op = exists ? store.delete(id) : store.put(true, id);
+        op.onsuccess = () => res(!exists);
+        op.onerror = e => rej(e.target.error);
+      };
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    lucide.createIcons();
+    const db = await openDB();
+    const favs = await getFavoriteIds(db);
+
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+      const id = Number(btn.dataset.bbId);
+      if (favs.has(id)) btn.classList.add('favorited');
+      btn.addEventListener('click', async () => {
+        const isFav = await toggleFavorite(db, id);
+        btn.classList.toggle('favorited', isFav);
+      });
+    });
+  });
+</script>
 {% endblock %}
