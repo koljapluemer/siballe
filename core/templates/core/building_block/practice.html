@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Practice{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold">Practice</h1>
+  <a href="{% url 'core:building_block_list' %}" class="btn btn-ghost btn-sm">← Building Blocks</a>
+</div>
+
+<div x-data="practice" x-cloak>
+
+  <div x-show="loading" class="flex justify-center py-20">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+
+  <div x-show="!loading && error === 'no-favorites'" class="text-center py-20">
+    <p class="text-base-content/50 mb-4">No favorites yet — star some building blocks to practice with them.</p>
+    <a href="{% url 'core:building_block_list' %}" class="btn btn-primary">Go to Building Blocks</a>
+  </div>
+
+  <div x-show="!loading && block" class="max-w-xl mx-auto">
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body gap-5">
+
+        <div class="flex items-start gap-3">
+          <span class="badge badge-outline font-mono mt-1" x-text="block?.language_code"></span>
+          <div>
+            <p class="text-2xl font-semibold leading-snug" x-text="block?.content"></p>
+            <p class="text-base-content/50 text-sm mt-1" x-text="block?.usage"></p>
+          </div>
+        </div>
+
+        <p class="text-sm text-base-content/40 border-t border-base-200 pt-4">
+          Form a sentence using this building block, then record yourself saying it aloud.
+        </p>
+
+        <div class="flex items-center gap-3">
+          <button x-show="recState === 'idle'" @click="startRecording()"
+            class="btn btn-primary gap-2">
+            <i data-lucide="mic" class="w-4 h-4"></i> Record
+          </button>
+
+          <button x-show="recState === 'recording'" @click="stopRecording()"
+            class="btn btn-error gap-2 animate-pulse">
+            <i data-lucide="square" class="w-4 h-4"></i> Stop
+          </button>
+
+          <div x-show="recState === 'recorded'" class="flex gap-2">
+            <button @click="play()" class="btn btn-outline gap-2">
+              <i data-lucide="play" class="w-4 h-4"></i> Play back
+            </button>
+            <button @click="next()" class="btn btn-primary gap-2">
+              Next <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+  [x-cloak] { display: none !important; }
+</style>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  const DB_NAME = 'siballe', STORE = 'bb_favorites';
+
+  function openDB() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open(DB_NAME, 1);
+      r.onupgradeneeded = e => e.target.result.createObjectStore(STORE);
+      r.onsuccess = e => res(e.target.result);
+      r.onerror = e => rej(e.target.error);
+    });
+  }
+
+  function getFavoriteIds(db) {
+    return new Promise((res, rej) => {
+      const req = db.transaction(STORE, 'readonly').objectStore(STORE).getAllKeys();
+      req.onsuccess = () => res(req.result.map(Number));
+      req.onerror = e => rej(e.target.error);
+    });
+  }
+
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('practice', () => ({
+      loading: true,
+      error: null,
+      block: null,
+      recState: 'idle',
+      audioUrl: null,
+      favoriteIds: [],
+      _recorder: null,
+      _chunks: [],
+
+      async init() {
+        lucide.createIcons();
+        const db = await openDB();
+        this.favoriteIds = await getFavoriteIds(db);
+        await this.loadNext();
+        this.loading = false;
+      },
+
+      async loadNext() {
+        const candidates = this.favoriteIds.filter(id => id !== this.block?.id);
+        const pool = candidates.length > 0 ? candidates : this.favoriteIds;
+        if (pool.length === 0) { this.error = 'no-favorites'; return; }
+
+        const id = pool[Math.floor(Math.random() * pool.length)];
+        const resp = await fetch(`/building-blocks/${id}/json/`);
+        if (!resp.ok) {
+          // block was deleted from Django — prune stale ID and retry
+          this.favoriteIds = this.favoriteIds.filter(fid => fid !== id);
+          return this.loadNext();
+        }
+        this.block = await resp.json();
+      },
+
+      async startRecording() {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this._chunks = [];
+        this._recorder = new MediaRecorder(stream);
+        this._recorder.ondataavailable = e => this._chunks.push(e.data);
+        this._recorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          if (this.audioUrl) URL.revokeObjectURL(this.audioUrl);
+          this.audioUrl = URL.createObjectURL(new Blob(this._chunks, { type: 'audio/webm' }));
+          this.recState = 'recorded';
+        };
+        this._recorder.start();
+        this.recState = 'recording';
+      },
+
+      stopRecording() {
+        this._recorder?.stop();
+      },
+
+      play() {
+        new Audio(this.audioUrl).play();
+      },
+
+      async next() {
+        if (this.audioUrl) { URL.revokeObjectURL(this.audioUrl); this.audioUrl = null; }
+        this.recState = 'idle';
+        await this.loadNext();
+      },
+    }));
+  });
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+{% endblock %}

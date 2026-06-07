@@ -1,5 +1,6 @@
 import re
 
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from core.models import BuildingBlock
@@ -67,3 +68,17 @@ def building_block_delete(request, pk):
         obj.delete()
         return redirect('core:building_block_list')
     return render(request, 'core/building_block/confirm_delete.html', {'obj': obj})
+
+
+def building_block_json(request, pk):
+    obj = get_object_or_404(BuildingBlock, pk=pk)
+    return JsonResponse({
+        'id': obj.pk,
+        'content': obj.content,
+        'usage': obj.usage,
+        'language_code': obj.language_code,
+    })
+
+
+def building_block_practice(request):
+    return render(request, 'core/building_block/practice.html', {})
