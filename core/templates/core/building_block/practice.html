@@ -31,29 +31,47 @@
           </div>
         </div>
 
-        <p class="text-sm text-base-content/40 border-t border-base-200 pt-4">
-          Form a sentence using this building block, then record yourself saying it aloud.
-        </p>
+        <div role="tablist" class="tabs tabs-bordered border-t border-base-200 pt-1 mt-1">
 
-        <div class="flex items-center gap-3">
-          <button x-show="recState === 'idle'" @click="startRecording()"
-            class="btn btn-primary gap-2">
-            <i data-lucide="mic" class="w-4 h-4"></i> Record
-          </button>
+          <input type="radio" name="practice_mode" role="tab" class="tab" aria-label="Record" checked />
+          <div role="tabpanel" class="tab-content pt-4">
+            <p class="text-sm text-base-content/40 mb-4">Form a sentence using this building block, then record yourself saying it aloud.</p>
+            <div class="flex items-center gap-3">
+              <button x-show="recState === 'idle'" @click="startRecording()"
+                class="btn btn-primary gap-2">
+                <i data-lucide="mic" class="w-4 h-4"></i> Record
+              </button>
 
-          <button x-show="recState === 'recording'" @click="stopRecording()"
-            class="btn btn-error gap-2 animate-pulse">
-            <i data-lucide="square" class="w-4 h-4"></i> Stop
-          </button>
+              <button x-show="recState === 'recording'" @click="stopRecording()"
+                class="btn btn-error gap-2 animate-pulse">
+                <i data-lucide="square" class="w-4 h-4"></i> Stop
+              </button>
 
-          <div x-show="recState === 'recorded'" class="flex gap-2">
-            <button @click="play()" class="btn btn-outline gap-2">
-              <i data-lucide="play" class="w-4 h-4"></i> Play back
-            </button>
-            <button @click="next()" class="btn btn-primary gap-2">
-              Next <i data-lucide="arrow-right" class="w-4 h-4"></i>
-            </button>
+              <div x-show="recState === 'recorded'" class="flex gap-2">
+                <button @click="play()" class="btn btn-outline gap-2">
+                  <i data-lucide="play" class="w-4 h-4"></i> Play back
+                </button>
+                <button @click="next()" class="btn btn-primary gap-2">
+                  Next <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
           </div>
+
+          <input type="radio" name="practice_mode" role="tab" class="tab" aria-label="Write" />
+          <div role="tabpanel" class="tab-content pt-4">
+            <p class="text-sm text-base-content/40 mb-4">Write a sentence using this building block.</p>
+            <textarea x-model="writtenSentence"
+              class="textarea textarea-bordered w-full"
+              rows="3"
+              placeholder="Type your sentence here…"></textarea>
+            <div class="flex justify-end mt-3">
+              <button @click="next()" class="btn btn-primary gap-2">
+                Next <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
         </div>
 
       </div>
@@ -95,6 +113,7 @@
       block: null,
       recState: 'idle',
       audioUrl: null,
+      writtenSentence: '',
       favoriteIds: [],
       _recorder: null,
       _chunks: [],
@@ -148,6 +167,7 @@
       async next() {
         if (this.audioUrl) { URL.revokeObjectURL(this.audioUrl); this.audioUrl = null; }
         this.recState = 'idle';
+        this.writtenSentence = '';
         await this.loadNext();
       },
     }));
