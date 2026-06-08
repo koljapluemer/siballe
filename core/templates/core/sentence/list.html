@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Sentences{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold">Sentences</h1>
+  <a href="{% url 'core:sentence_create' %}" class="btn btn-primary btn-sm">New</a>
+</div>
+
+<div class="overflow-x-auto">
+  <table class="table table-zebra w-full">
+    <thead>
+      <tr>
+        <th>Lang</th>
+        <th>Content</th>
+        <th>Usage</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sentences %}
+      <tr>
+        <td><span class="badge badge-outline font-mono">{{ s.language_code }}</span></td>
+        <td class="max-w-sm truncate">{{ s.content }}</td>
+        <td class="max-w-xs truncate text-base-content/60">{{ s.usage }}</td>
+        <td class="text-right whitespace-nowrap">
+          <a href="{% url 'core:sentence_detail' s.pk %}" class="btn btn-xs btn-ghost">View</a>
+          <a href="{% url 'core:sentence_update' s.pk %}" class="btn btn-xs btn-ghost">Edit</a>
+          <a href="{% url 'core:sentence_delete' s.pk %}" class="btn btn-xs btn-ghost text-error">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="text-center text-base-content/50 py-8">No sentences yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

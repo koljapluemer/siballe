@@ -24,39 +24,33 @@
   </div>
 
   <div class="flex items-center justify-between mt-6 mb-2">
-    <h2 class="text-lg font-semibold">Speech Acts</h2>
-    <a href="{% url 'core:speech_act_create' %}?situation={{ obj.pk }}" class="btn btn-primary btn-sm">+ Add</a>
+    <h2 class="text-lg font-semibold">Utterances</h2>
+    <a href="{% url 'core:situational_utterance_create' %}?situation={{ obj.pk }}" class="btn btn-primary btn-sm">+ Add</a>
   </div>
 
-  {% with speech_acts=obj.speech_acts.all %}
-  {% if speech_acts %}
+  {% with utterances=obj.utterances.select_related %}
+  {% if utterances %}
   <div class="flex flex-col gap-2">
-    {% for sa in speech_acts %}
+    {% for u in utterances %}
     <div class="card bg-base-100 shadow-sm">
       <div class="card-body py-3 px-4 gap-1">
         <div class="flex items-start justify-between gap-2">
-          <p class="text-sm">{{ sa.description }}</p>
+          <div class="min-w-0">
+            <p class="text-xs text-base-content/50 mb-0.5">{{ u.speech_act }}</p>
+            <p class="text-sm font-mono">{{ u.sentence }}</p>
+            {% if u.context %}<p class="text-xs text-base-content/60 mt-0.5">{{ u.context }}</p>{% endif %}
+          </div>
           <div class="flex gap-1 shrink-0">
-            <a href="{% url 'core:speech_act_detail' sa.pk %}" class="btn btn-ghost btn-xs">View</a>
-            <a href="{% url 'core:speech_act_update' sa.pk %}" class="btn btn-ghost btn-xs">Edit</a>
-            <a href="{% url 'core:speech_act_delete' sa.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
+            <a href="{% url 'core:situational_utterance_detail' u.pk %}" class="btn btn-ghost btn-xs">View</a>
+            <a href="{% url 'core:situational_utterance_delete' u.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
           </div>
         </div>
-        {% with sentences=sa.sentences.all %}
-        {% if sentences %}
-        <div class="flex flex-wrap gap-1 mt-1">
-          {% for s in sentences %}
-          <span class="badge badge-outline font-mono text-xs">{{ s }}</span>
-          {% endfor %}
-        </div>
-        {% endif %}
-        {% endwith %}
       </div>
     </div>
     {% endfor %}
   </div>
   {% else %}
-  <p class="text-sm text-base-content/50">No speech acts yet.</p>
+  <p class="text-sm text-base-content/50">No utterances yet.</p>
   {% endif %}
   {% endwith %}
 </div>

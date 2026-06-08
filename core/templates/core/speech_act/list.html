@@ -13,17 +13,15 @@
     <thead>
       <tr>
         <th>Description</th>
-        <th>Situation</th>
-        <th>Sentences</th>
+        <th>Utterances</th>
         <th></th>
       </tr>
     </thead>
     <tbody>
       {% for sa in speech_acts %}
       <tr>
-        <td class="max-w-sm truncate">{{ sa.description }}</td>
-        <td class="max-w-xs truncate text-base-content/60">{{ sa.situation }}</td>
-        <td>{{ sa.sentences.count }}</td>
+        <td class="max-w-md truncate">{{ sa.description }}</td>
+        <td>{{ sa.utterances.count }}</td>
         <td class="text-right whitespace-nowrap">
           <a href="{% url 'core:speech_act_detail' sa.pk %}" class="btn btn-xs btn-ghost">View</a>
           <a href="{% url 'core:speech_act_update' sa.pk %}" class="btn btn-xs btn-ghost">Edit</a>
@@ -31,7 +29,7 @@
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="4" class="text-center text-base-content/50 py-8">No speech acts yet.</td></tr>
+      <tr><td colspan="3" class="text-center text-base-content/50 py-8">No speech acts yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>

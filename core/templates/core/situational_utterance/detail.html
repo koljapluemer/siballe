@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}{{ obj }}{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+  <div class="flex items-center gap-3 mb-4">
+    <a href="{% url 'core:situational_utterance_list' %}" class="btn btn-ghost btn-sm">&larr;</a>
+    <h1 class="text-2xl font-bold">Situational Utterance</h1>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body gap-4">
+      <div>
+        <p class="text-sm text-base-content/60 mb-1">Situation</p>
+        <a href="{% url 'core:situation_detail' obj.situation.pk %}" class="link link-hover">{{ obj.situation }}</a>
+      </div>
+      <div>
+        <p class="text-sm text-base-content/60 mb-1">Speech Act</p>
+        <a href="{% url 'core:speech_act_detail' obj.speech_act.pk %}" class="link link-hover">{{ obj.speech_act }}</a>
+      </div>
+      <div>
+        <p class="text-sm text-base-content/60 mb-1">Sentence</p>
+        <p class="font-mono text-sm">{{ obj.sentence }}</p>
+      </div>
+      <div>
+        <p class="text-sm text-base-content/60 mb-1">Context</p>
+        <p class="whitespace-pre-wrap">{{ obj.context }}</p>
+      </div>
+
+      <div class="card-actions pt-2 border-t border-base-200">
+        <a href="{% url 'core:situational_utterance_update' obj.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+        <a href="{% url 'core:situational_utterance_delete' obj.pk %}" class="btn btn-error btn-outline btn-sm">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

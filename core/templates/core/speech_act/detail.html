@@ -12,26 +12,8 @@
   <div class="card bg-base-100 shadow">
     <div class="card-body gap-4">
       <div>
-        <p class="text-sm text-base-content/60 mb-1">Situation</p>
-        <a href="{% url 'core:situation_detail' obj.situation.pk %}" class="link link-hover">{{ obj.situation }}</a>
-      </div>
-      <div>
         <p class="text-sm text-base-content/60 mb-1">Description</p>
         <p class="whitespace-pre-wrap">{{ obj.description }}</p>
-      </div>
-      <div>
-        <p class="text-sm text-base-content/60 mb-1">Sentences</p>
-        {% with sentences=obj.sentences.all %}
-        {% if sentences %}
-        <div class="flex flex-wrap gap-1">
-          {% for s in sentences %}
-          <span class="badge badge-outline font-mono text-xs">{{ s }}</span>
-          {% endfor %}
-        </div>
-        {% else %}
-        <p class="text-sm text-base-content/50">None.</p>
-        {% endif %}
-        {% endwith %}
       </div>
 
       <div class="card-actions pt-2 border-t border-base-200">
@@ -40,5 +22,36 @@
       </div>
     </div>
   </div>
+
+  <div class="flex items-center justify-between mt-6 mb-2">
+    <h2 class="text-lg font-semibold">Utterances</h2>
+    <a href="{% url 'core:situational_utterance_create' %}?speech_act={{ obj.pk }}" class="btn btn-primary btn-sm">+ Add</a>
+  </div>
+
+  {% with utterances=obj.utterances.select_related %}
+  {% if utterances %}
+  <div class="flex flex-col gap-2">
+    {% for u in utterances %}
+    <div class="card bg-base-100 shadow-sm">
+      <div class="card-body py-3 px-4 gap-1">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-xs text-base-content/50 mb-0.5">{{ u.situation }}</p>
+            <p class="text-sm font-mono">{{ u.sentence }}</p>
+            {% if u.context %}<p class="text-xs text-base-content/60 mt-0.5">{{ u.context }}</p>{% endif %}
+          </div>
+          <div class="flex gap-1 shrink-0">
+            <a href="{% url 'core:situational_utterance_detail' u.pk %}" class="btn btn-ghost btn-xs">View</a>
+            <a href="{% url 'core:situational_utterance_delete' u.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-sm text-base-content/50">No utterances yet.</p>
+  {% endif %}
+  {% endwith %}
 </div>
 {% endblock %}

@@ -8,7 +8,7 @@ from .building_block import (
     building_block_practice,
     building_block_update,
 )
-from .sentence import sentence_create, sentence_delete, sentence_update
+from .sentence import sentence_create, sentence_delete, sentence_detail, sentence_list, sentence_update
 from .situation import (
     situation_create,
     situation_delete,
@@ -22,4 +22,11 @@ from .speech_act import (
     speech_act_detail,
     speech_act_list,
     speech_act_update,
+)
+from .situational_utterance import (
+    situational_utterance_create,
+    situational_utterance_delete,
+    situational_utterance_detail,
+    situational_utterance_list,
+    situational_utterance_update,
 )

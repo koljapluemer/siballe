@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Delete Sentence{% endblock %}
+{% block title %}Delete Utterance{% endblock %}
 
 {% block content %}
 <div class="max-w-md">
@@ -14,7 +14,7 @@
           {% csrf_token %}
           <button type="submit" class="btn btn-error">Delete</button>
         </form>
-        <a href="{% url 'core:sentence_detail' obj.pk %}" class="btn btn-ghost">Cancel</a>
+        <a href="{% url 'core:situational_utterance_detail' obj.pk %}" class="btn btn-ghost">Cancel</a>
       </div>
     </div>
   </div>

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}{% if obj %}Edit Utterance{% else %}New Utterance{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+  <div class="flex items-center gap-3 mb-4">
+    <a href="{% if obj %}{% url 'core:situational_utterance_detail' obj.pk %}{% else %}{% url 'core:situational_utterance_list' %}{% endif %}" class="btn btn-ghost btn-sm">&larr;</a>
+    <h1 class="text-2xl font-bold">{% if obj %}Edit Utterance{% else %}New Utterance{% endif %}</h1>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="form-control mb-4">
+          <label class="label"><span class="label-text font-medium">Situation</span></label>
+          <select name="situation" class="select select-bordered{% if errors.situation %} select-error{% endif %}">
+            <option value="">— select —</option>
+            {% for sit in situations %}
+            <option value="{{ sit.pk }}"{% if sit.pk|stringformat:"s" == sel.situation %}selected{% endif %}>{{ sit }}</option>
+            {% endfor %}
+          </select>
+          {% if errors.situation %}<p class="text-error text-sm mt-1">{{ errors.situation }}</p>{% endif %}
+        </div>
+
+        <div class="form-control mb-4">
+          <label class="label"><span class="label-text font-medium">Speech Act</span></label>
+          <select name="speech_act" class="select select-bordered{% if errors.speech_act %} select-error{% endif %}">
+            <option value="">— select —</option>
+            {% for sa in speech_acts %}
+            <option value="{{ sa.pk }}"{% if sa.pk|stringformat:"s" == sel.speech_act %}selected{% endif %}>{{ sa }}</option>
+            {% endfor %}
+          </select>
+          {% if errors.speech_act %}<p class="text-error text-sm mt-1">{{ errors.speech_act }}</p>{% endif %}
+        </div>
+
+        <div class="form-control mb-4">
+          <label class="label"><span class="label-text font-medium">Sentence</span></label>
+          <select name="sentence" class="select select-bordered{% if errors.sentence %} select-error{% endif %}">
+            <option value="">— select —</option>
+            {% for s in sentences %}
+            <option value="{{ s.pk }}"{% if s.pk|stringformat:"s" == sel.sentence %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+          {% if errors.sentence %}<p class="text-error text-sm mt-1">{{ errors.sentence }}</p>{% endif %}
+        </div>
+
+        <div class="form-control mb-6">
+          <label class="label"><span class="label-text font-medium">Context</span></label>
+          <textarea name="context" rows="4"
+            class="textarea textarea-bordered{% if errors.context %} textarea-error{% endif %}">{{ values.context|default:'' }}</textarea>
+          {% if errors.context %}<p class="text-error text-sm mt-1">{{ errors.context }}</p>{% endif %}
+        </div>
+
+        <div class="flex gap-2">
+          <button type="submit" class="btn btn-primary">Save</button>
+          <a href="{% if obj %}{% url 'core:situational_utterance_detail' obj.pk %}{% else %}{% url 'core:situational_utterance_list' %}{% endif %}"
+            class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

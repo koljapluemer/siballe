@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Situational Utterances{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold">Situational Utterances</h1>
+  <a href="{% url 'core:situational_utterance_create' %}" class="btn btn-primary btn-sm">New</a>
+</div>
+
+<div class="overflow-x-auto">
+  <table class="table table-zebra w-full">
+    <thead>
+      <tr>
+        <th>Situation</th>
+        <th>Speech Act</th>
+        <th>Sentence</th>
+        <th>Context</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in utterances %}
+      <tr>
+        <td class="max-w-xs truncate">{{ u.situation }}</td>
+        <td class="max-w-xs truncate">{{ u.speech_act }}</td>
+        <td class="max-w-xs truncate font-mono text-sm">{{ u.sentence }}</td>
+        <td class="max-w-xs truncate text-base-content/60">{{ u.context }}</td>
+        <td class="text-right whitespace-nowrap">
+          <a href="{% url 'core:situational_utterance_detail' u.pk %}" class="btn btn-xs btn-ghost">View</a>
+          <a href="{% url 'core:situational_utterance_update' u.pk %}" class="btn btn-xs btn-ghost">Edit</a>
+          <a href="{% url 'core:situational_utterance_delete' u.pk %}" class="btn btn-xs btn-ghost text-error">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-center text-base-content/50 py-8">No utterances yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

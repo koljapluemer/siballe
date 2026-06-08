@@ -2,7 +2,7 @@ import re
 
 from django.shortcuts import get_object_or_404, redirect, render
 
-from core.models import BuildingBlock, Sentence
+from core.models import Sentence
 
 
 def _validate(post):
@@ -22,42 +22,44 @@ def _validate(post):
     return values, errors
 
 
-def sentence_create(request, bb_pk):
-    bb = get_object_or_404(BuildingBlock, pk=bb_pk)
+def sentence_list(request):
+    sentences = Sentence.objects.all().order_by('language_code', 'id')
+    return render(request, 'core/sentence/list.html', {'sentences': sentences})
+
+
+def sentence_create(request):
     if request.method == 'POST':
         values, errors = _validate(request.POST)
         if not errors:
-            sentence = Sentence.objects.create(**values)
-            bb.sentences.add(sentence)
-            return redirect('core:building_block_detail', pk=bb_pk)
-        return render(request, 'core/sentence/form.html', {'values': values, 'errors': errors, 'bb': bb})
-    return render(request, 'core/sentence/form.html', {'bb': bb})
+            obj = Sentence.objects.create(**values)
+            return redirect('core:sentence_detail', pk=obj.pk)
+        return render(request, 'core/sentence/form.html', {'values': values, 'errors': errors})
+    return render(request, 'core/sentence/form.html', {})
 
 
-def sentence_update(request, bb_pk, pk):
-    bb = get_object_or_404(BuildingBlock, pk=bb_pk)
-    sentence = get_object_or_404(Sentence, pk=pk)
+def sentence_detail(request, pk):
+    obj = get_object_or_404(Sentence, pk=pk)
+    return render(request, 'core/sentence/detail.html', {'obj': obj})
+
+
+def sentence_update(request, pk):
+    obj = get_object_or_404(Sentence, pk=pk)
     if request.method == 'POST':
         values, errors = _validate(request.POST)
         if not errors:
-            sentence.content = values['content']
-            sentence.language_code = values['language_code']
-            sentence.usage = values['usage']
-            sentence.save()
-            return redirect('core:building_block_detail', pk=bb_pk)
-        return render(request, 'core/sentence/form.html', {'values': values, 'errors': errors, 'bb': bb, 'obj': sentence})
-    values = {
-        'content': sentence.content,
-        'language_code': sentence.language_code,
-        'usage': sentence.usage,
-    }
-    return render(request, 'core/sentence/form.html', {'values': values, 'bb': bb, 'obj': sentence})
+            obj.content = values['content']
+            obj.language_code = values['language_code']
+            obj.usage = values['usage']
+            obj.save()
+            return redirect('core:sentence_detail', pk=obj.pk)
+        return render(request, 'core/sentence/form.html', {'values': values, 'errors': errors, 'obj': obj})
+    values = {'content': obj.content, 'language_code': obj.language_code, 'usage': obj.usage}
+    return render(request, 'core/sentence/form.html', {'values': values, 'obj': obj})
 
 
-def sentence_delete(request, bb_pk, pk):
-    bb = get_object_or_404(BuildingBlock, pk=bb_pk)
-    sentence = get_object_or_404(Sentence, pk=pk)
+def sentence_delete(request, pk):
+    obj = get_object_or_404(Sentence, pk=pk)
     if request.method == 'POST':
-        sentence.delete()
-        return redirect('core:building_block_detail', pk=bb_pk)
-    return render(request, 'core/sentence/confirm_delete.html', {'obj': sentence, 'bb': bb})
+        obj.delete()
+        return redirect('core:sentence_list')
+    return render(request, 'core/sentence/confirm_delete.html', {'obj': obj})
