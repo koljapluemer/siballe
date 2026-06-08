@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Speech Acts{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold">Speech Acts</h1>
+  <a href="{% url 'core:speech_act_create' %}" class="btn btn-primary btn-sm">New</a>
+</div>
+
+<div class="overflow-x-auto">
+  <table class="table table-zebra w-full">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Situation</th>
+        <th>Sentences</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sa in speech_acts %}
+      <tr>
+        <td class="max-w-sm truncate">{{ sa.description }}</td>
+        <td class="max-w-xs truncate text-base-content/60">{{ sa.situation }}</td>
+        <td>{{ sa.sentences.count }}</td>
+        <td class="text-right whitespace-nowrap">
+          <a href="{% url 'core:speech_act_detail' sa.pk %}" class="btn btn-xs btn-ghost">View</a>
+          <a href="{% url 'core:speech_act_update' sa.pk %}" class="btn btn-xs btn-ghost">Edit</a>
+          <a href="{% url 'core:speech_act_delete' sa.pk %}" class="btn btn-xs btn-ghost text-error">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="text-center text-base-content/50 py-8">No speech acts yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

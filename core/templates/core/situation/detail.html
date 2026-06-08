@@ -25,7 +25,7 @@
 
   <div class="flex items-center justify-between mt-6 mb-2">
     <h2 class="text-lg font-semibold">Speech Acts</h2>
-    <a href="{% url 'core:speech_act_create' obj.pk %}" class="btn btn-primary btn-sm">+ Add</a>
+    <a href="{% url 'core:speech_act_create' %}?situation={{ obj.pk }}" class="btn btn-primary btn-sm">+ Add</a>
   </div>
 
   {% with speech_acts=obj.speech_acts.all %}
@@ -37,8 +37,9 @@
         <div class="flex items-start justify-between gap-2">
           <p class="text-sm">{{ sa.description }}</p>
           <div class="flex gap-1 shrink-0">
-            <a href="{% url 'core:speech_act_update' obj.pk sa.pk %}" class="btn btn-ghost btn-xs">Edit</a>
-            <a href="{% url 'core:speech_act_delete' obj.pk sa.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
+            <a href="{% url 'core:speech_act_detail' sa.pk %}" class="btn btn-ghost btn-xs">View</a>
+            <a href="{% url 'core:speech_act_update' sa.pk %}" class="btn btn-ghost btn-xs">Edit</a>
+            <a href="{% url 'core:speech_act_delete' sa.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
           </div>
         </div>
         {% with sentences=sa.sentences.all %}

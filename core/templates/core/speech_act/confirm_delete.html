@@ -14,7 +14,7 @@
           {% csrf_token %}
           <button type="submit" class="btn btn-error">Delete</button>
         </form>
-        <a href="{% url 'core:situation_detail' situation.pk %}" class="btn btn-ghost">Cancel</a>
+        <a href="{% url 'core:speech_act_detail' obj.pk %}" class="btn btn-ghost">Cancel</a>
       </div>
     </div>
   </div>

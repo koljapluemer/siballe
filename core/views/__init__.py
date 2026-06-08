@@ -1,3 +1,4 @@
+from .dashboard import dashboard
 from .building_block import (
     building_block_create,
     building_block_delete,
@@ -15,4 +16,10 @@ from .situation import (
     situation_list,
     situation_update,
 )
-from .speech_act import speech_act_create, speech_act_delete, speech_act_update
+from .speech_act import (
+    speech_act_create,
+    speech_act_delete,
+    speech_act_detail,
+    speech_act_list,
+    speech_act_update,
+)

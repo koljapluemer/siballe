@@ -5,6 +5,7 @@ from core import views
 app_name = 'core'
 
 urlpatterns = [
+    path('', views.dashboard, name='dashboard'),
     path('building-blocks/', views.building_block_list, name='building_block_list'),
     path('building-blocks/new/', views.building_block_create, name='building_block_create'),
     path('building-blocks/practice/', views.building_block_practice, name='building_block_practice'),
@@ -20,7 +21,9 @@ urlpatterns = [
     path('situations/<int:pk>/', views.situation_detail, name='situation_detail'),
     path('situations/<int:pk>/edit/', views.situation_update, name='situation_update'),
     path('situations/<int:pk>/delete/', views.situation_delete, name='situation_delete'),
-    path('situations/<int:situation_pk>/speech-acts/new/', views.speech_act_create, name='speech_act_create'),
-    path('situations/<int:situation_pk>/speech-acts/<int:pk>/edit/', views.speech_act_update, name='speech_act_update'),
-    path('situations/<int:situation_pk>/speech-acts/<int:pk>/delete/', views.speech_act_delete, name='speech_act_delete'),
+    path('speech-acts/', views.speech_act_list, name='speech_act_list'),
+    path('speech-acts/new/', views.speech_act_create, name='speech_act_create'),
+    path('speech-acts/<int:pk>/', views.speech_act_detail, name='speech_act_detail'),
+    path('speech-acts/<int:pk>/edit/', views.speech_act_update, name='speech_act_update'),
+    path('speech-acts/<int:pk>/delete/', views.speech_act_delete, name='speech_act_delete'),
 ]
