@@ -19,11 +19,6 @@
         <p class="text-sm text-base-content/60 mb-1">Content</p>
         <p class="whitespace-pre-wrap">{{ obj.content }}</p>
       </div>
-      <div>
-        <p class="text-sm text-base-content/60 mb-1">Usage</p>
-        <p class="whitespace-pre-wrap">{{ obj.usage }}</p>
-      </div>
-
       <div class="card-actions pt-2 border-t border-base-200">
         <a href="{% url 'core:sentence_update' obj.pk %}" class="btn btn-secondary btn-sm">Edit</a>
         <a href="{% url 'core:sentence_delete' obj.pk %}" class="btn btn-error btn-outline btn-sm">Delete</a>

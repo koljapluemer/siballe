@@ -21,19 +21,12 @@
           {% if errors.content %}<p class="text-error text-sm mt-1">{{ errors.content }}</p>{% endif %}
         </div>
 
-        <div class="form-control mb-4">
+        <div class="form-control mb-6">
           <label class="label"><span class="label-text font-medium">Language Code</span></label>
           <input type="text" name="language_code" maxlength="3"
             value="{{ values.language_code|default:'' }}"
             class="input input-bordered font-mono w-24{% if errors.language_code %} input-error{% endif %}">
           {% if errors.language_code %}<p class="text-error text-sm mt-1">{{ errors.language_code }}</p>{% endif %}
-        </div>
-
-        <div class="form-control mb-6">
-          <label class="label"><span class="label-text font-medium">Usage</span></label>
-          <textarea name="usage" rows="2"
-            class="textarea textarea-bordered{% if errors.usage %} textarea-error{% endif %}">{{ values.usage|default:'' }}</textarea>
-          {% if errors.usage %}<p class="text-error text-sm mt-1">{{ errors.usage }}</p>{% endif %}
         </div>
 
         <div class="flex gap-2">

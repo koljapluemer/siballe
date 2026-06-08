@@ -53,7 +53,6 @@
             <a href="{% url 'core:sentence_delete' s.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
           </div>
         </div>
-        {% if s.usage %}<p class="text-xs text-base-content/60">{{ s.usage }}</p>{% endif %}
       </div>
     </div>
     {% endfor %}

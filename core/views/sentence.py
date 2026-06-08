@@ -9,15 +9,12 @@ def _validate(post):
     values = {
         'content': post.get('content', '').strip(),
         'language_code': post.get('language_code', '').strip(),
-        'usage': post.get('usage', '').strip(),
     }
     errors = {}
     if not values['content']:
         errors['content'] = 'Required.'
     if not re.fullmatch(r'[a-zA-Z]{3}', values['language_code']):
         errors['language_code'] = 'Must be exactly 3 alphabetic characters.'
-    if not values['usage']:
-        errors['usage'] = 'Required.'
     values['language_code'] = values['language_code'].lower()
     return values, errors
 
@@ -49,11 +46,10 @@ def sentence_update(request, pk):
         if not errors:
             obj.content = values['content']
             obj.language_code = values['language_code']
-            obj.usage = values['usage']
             obj.save()
             return redirect('core:sentence_detail', pk=obj.pk)
         return render(request, 'core/sentence/form.html', {'values': values, 'errors': errors, 'obj': obj})
-    values = {'content': obj.content, 'language_code': obj.language_code, 'usage': obj.usage}
+    values = {'content': obj.content, 'language_code': obj.language_code}
     return render(request, 'core/sentence/form.html', {'values': values, 'obj': obj})
 
 
