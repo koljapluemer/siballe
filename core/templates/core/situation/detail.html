@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{{ obj }}{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+  <div class="flex items-center gap-3 mb-4">
+    <a href="{% url 'core:situation_list' %}" class="btn btn-ghost btn-sm">&larr;</a>
+    <h1 class="text-2xl font-bold">Situation</h1>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body gap-4">
+      <div>
+        <p class="text-sm text-base-content/60 mb-1">Description</p>
+        <p class="whitespace-pre-wrap">{{ obj.description }}</p>
+      </div>
+
+      <div class="card-actions pt-2 border-t border-base-200">
+        <a href="{% url 'core:situation_update' obj.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+        <a href="{% url 'core:situation_delete' obj.pk %}" class="btn btn-error btn-outline btn-sm">Delete</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between mt-6 mb-2">
+    <h2 class="text-lg font-semibold">Speech Acts</h2>
+    <a href="{% url 'core:speech_act_create' obj.pk %}" class="btn btn-primary btn-sm">+ Add</a>
+  </div>
+
+  {% with speech_acts=obj.speech_acts.all %}
+  {% if speech_acts %}
+  <div class="flex flex-col gap-2">
+    {% for sa in speech_acts %}
+    <div class="card bg-base-100 shadow-sm">
+      <div class="card-body py-3 px-4 gap-1">
+        <div class="flex items-start justify-between gap-2">
+          <p class="text-sm">{{ sa.description }}</p>
+          <div class="flex gap-1 shrink-0">
+            <a href="{% url 'core:speech_act_update' obj.pk sa.pk %}" class="btn btn-ghost btn-xs">Edit</a>
+            <a href="{% url 'core:speech_act_delete' obj.pk sa.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
+          </div>
+        </div>
+        {% with sentences=sa.sentences.all %}
+        {% if sentences %}
+        <div class="flex flex-wrap gap-1 mt-1">
+          {% for s in sentences %}
+          <span class="badge badge-outline font-mono text-xs">{{ s }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-sm text-base-content/50">No speech acts yet.</p>
+  {% endif %}
+  {% endwith %}
+</div>
+{% endblock %}

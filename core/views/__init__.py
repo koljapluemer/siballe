@@ -8,3 +8,11 @@ from .building_block import (
     building_block_update,
 )
 from .sentence import sentence_create, sentence_delete, sentence_update
+from .situation import (
+    situation_create,
+    situation_delete,
+    situation_detail,
+    situation_list,
+    situation_update,
+)
+from .speech_act import speech_act_create, speech_act_delete, speech_act_update

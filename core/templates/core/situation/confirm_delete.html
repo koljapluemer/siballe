@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Situation{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title">Delete?</h2>
+      <p class="font-mono text-sm bg-base-200 rounded p-2">{{ obj }}</p>
+
+      <div class="card-actions mt-4">
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-error">Delete</button>
+        </form>
+        <a href="{% url 'core:situation_detail' obj.pk %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

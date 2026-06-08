@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Situations{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold">Situations</h1>
+  <a href="{% url 'core:situation_create' %}" class="btn btn-primary btn-sm">New</a>
+</div>
+
+<div class="overflow-x-auto">
+  <table class="table table-zebra w-full">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Speech Acts</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for obj in situations %}
+      <tr>
+        <td class="max-w-md truncate">{{ obj.description }}</td>
+        <td>{{ obj.speech_acts.count }}</td>
+        <td class="text-right whitespace-nowrap">
+          <a href="{% url 'core:situation_detail' obj.pk %}" class="btn btn-xs btn-ghost">View</a>
+          <a href="{% url 'core:situation_update' obj.pk %}" class="btn btn-xs btn-ghost">Edit</a>
+          <a href="{% url 'core:situation_delete' obj.pk %}" class="btn btn-xs btn-ghost text-error">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3" class="text-center text-base-content/50 py-8">No situations yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

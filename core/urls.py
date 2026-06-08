@@ -15,4 +15,12 @@ urlpatterns = [
     path('building-blocks/<int:bb_pk>/sentences/new/', views.sentence_create, name='sentence_create'),
     path('building-blocks/<int:bb_pk>/sentences/<int:pk>/edit/', views.sentence_update, name='sentence_update'),
     path('building-blocks/<int:bb_pk>/sentences/<int:pk>/delete/', views.sentence_delete, name='sentence_delete'),
+    path('situations/', views.situation_list, name='situation_list'),
+    path('situations/new/', views.situation_create, name='situation_create'),
+    path('situations/<int:pk>/', views.situation_detail, name='situation_detail'),
+    path('situations/<int:pk>/edit/', views.situation_update, name='situation_update'),
+    path('situations/<int:pk>/delete/', views.situation_delete, name='situation_delete'),
+    path('situations/<int:situation_pk>/speech-acts/new/', views.speech_act_create, name='speech_act_create'),
+    path('situations/<int:situation_pk>/speech-acts/<int:pk>/edit/', views.speech_act_update, name='speech_act_update'),
+    path('situations/<int:situation_pk>/speech-acts/<int:pk>/delete/', views.speech_act_delete, name='speech_act_delete'),
 ]
