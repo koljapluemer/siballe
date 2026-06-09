@@ -6,6 +6,11 @@ app_name = 'core'
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
+    path('languages/', views.language_list, name='language_list'),
+    path('languages/new/', views.language_create, name='language_create'),
+    path('languages/<str:pk>/', views.language_detail, name='language_detail'),
+    path('languages/<str:pk>/edit/', views.language_update, name='language_update'),
+    path('languages/<str:pk>/delete/', views.language_delete, name='language_delete'),
     path('building-blocks/', views.building_block_list, name='building_block_list'),
     path('building-blocks/new/', views.building_block_create, name='building_block_create'),
     path('building-blocks/practice/', views.building_block_practice, name='building_block_practice'),

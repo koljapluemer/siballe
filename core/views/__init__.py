@@ -1,4 +1,11 @@
 from .dashboard import dashboard
+from .language import (
+    language_create,
+    language_delete,
+    language_detail,
+    language_list,
+    language_update,
+)
 from .building_block import (
     building_block_create,
     building_block_delete,

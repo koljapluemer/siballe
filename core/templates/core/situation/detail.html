@@ -12,6 +12,10 @@
   <div class="card bg-base-100 shadow">
     <div class="card-body gap-4">
       <div>
+        <p class="text-sm text-base-content/60 mb-1">Language</p>
+        <span class="badge badge-outline font-mono text-base">{{ obj.language_id|default:"—" }}</span>
+      </div>
+      <div>
         <p class="text-sm text-base-content/60 mb-1">Description</p>
         <p class="whitespace-pre-wrap">{{ obj.description }}</p>
       </div>

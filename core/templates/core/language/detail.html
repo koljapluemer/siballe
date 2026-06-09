@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}{{ obj }}{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+  <div class="flex items-center gap-3 mb-4">
+    <a href="{% url 'core:language_list' %}" class="btn btn-ghost btn-sm">&larr;</a>
+    <h1 class="text-2xl font-bold">Language</h1>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body gap-4">
+      <div>
+        <p class="text-sm text-base-content/60 mb-1">Code</p>
+        <span class="badge badge-outline font-mono text-base">{{ obj.iso3 }}</span>
+      </div>
+      <div>
+        <p class="text-sm text-base-content/60 mb-1">Name</p>
+        <p class="text-lg">{{ obj.name }}</p>
+      </div>
+      <div class="card-actions pt-2 border-t border-base-200">
+        <a href="{% url 'core:language_update' obj.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+        <a href="{% url 'core:language_delete' obj.pk %}" class="btn btn-error btn-outline btn-sm">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

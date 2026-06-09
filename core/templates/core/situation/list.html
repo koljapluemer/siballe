@@ -12,6 +12,7 @@
   <table class="table table-zebra w-full">
     <thead>
       <tr>
+        <th>Lang</th>
         <th>Description</th>
         <th>Speech Acts</th>
         <th></th>
@@ -20,6 +21,7 @@
     <tbody>
       {% for obj in situations %}
       <tr>
+        <td><span class="badge badge-outline font-mono">{{ obj.language_id|default:"—" }}</span></td>
         <td class="max-w-md truncate">{{ obj.description }}</td>
         <td>{{ obj.speech_acts.count }}</td>
         <td class="text-right whitespace-nowrap">
@@ -29,7 +31,7 @@
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="3" class="text-center text-base-content/50 py-8">No situations yet.</td></tr>
+      <tr><td colspan="4" class="text-center text-base-content/50 py-8">No situations yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>

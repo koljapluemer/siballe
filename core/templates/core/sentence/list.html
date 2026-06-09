@@ -20,7 +20,7 @@
     <tbody>
       {% for s in sentences %}
       <tr>
-        <td><span class="badge badge-outline font-mono">{{ s.language_code }}</span></td>
+        <td><span class="badge badge-outline font-mono">{{ s.language_id }}</span></td>
         <td class="max-w-sm truncate">{{ s.content }}</td>
         <td class="text-right whitespace-nowrap">
           <a href="{% url 'core:sentence_detail' s.pk %}" class="btn btn-xs btn-ghost">View</a>

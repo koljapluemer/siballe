@@ -1,3 +1,4 @@
+from .language import Language
 from .building_block import BuildingBlock
 from .sentence import Sentence
 from .situation import Situation

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Language{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+  <div class="flex items-center gap-3 mb-4">
+    <a href="{% url 'core:language_detail' obj.pk %}" class="btn btn-ghost btn-sm">&larr;</a>
+    <h1 class="text-2xl font-bold">Delete Language</h1>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <p>Delete <strong>{{ obj }}</strong>? This cannot be undone. Deletion is blocked if any building blocks, sentences, or situations reference this language.</p>
+      <div class="card-actions mt-4">
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-error">Delete</button>
+        </form>
+        <a href="{% url 'core:language_detail' obj.pk %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

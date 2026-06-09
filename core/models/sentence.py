@@ -1,10 +1,9 @@
 from django.db import models
 
-from .building_block import language_code_validator
-
 
 class Sentence(models.Model):
     content = models.TextField()
-    language_code = models.CharField(max_length=3, validators=[language_code_validator])
+    language = models.ForeignKey('Language', on_delete=models.PROTECT, related_name='sentences')
+
     def __str__(self):
-        return f"[{self.language_code}] {self.content[:50]}"
+        return f"[{self.language_id}] {self.content[:50]}"

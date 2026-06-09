@@ -6,8 +6,6 @@ from core.models import Sentence, Situation, SituationalUtterance, SpeechAct
 def _validate(post):
     values = {'context': post.get('context', '').strip()}
     errors = {}
-    if not values['context']:
-        errors['context'] = 'Required.'
     if not post.get('situation'):
         errors['situation'] = 'Required.'
     if not post.get('speech_act'):
@@ -21,7 +19,7 @@ def _form_context(extra=None):
     ctx = {
         'situations': Situation.objects.all().order_by('id'),
         'speech_acts': SpeechAct.objects.all().order_by('id'),
-        'sentences': Sentence.objects.all().order_by('language_code', 'id'),
+        'sentences': Sentence.objects.all().order_by('language_id', 'id'),
     }
     if extra:
         ctx.update(extra)
@@ -50,7 +48,8 @@ def situational_utterance_create(request):
             'values': values, 'errors': errors,
             'sel': {k: request.POST.get(k, '') for k in ('situation', 'speech_act', 'sentence')},
         }))
-    return render(request, 'core/situational_utterance/form.html', _form_context({'sel': {}}))
+    sel = {k: request.GET.get(k, '') for k in ('situation', 'speech_act', 'sentence')}
+    return render(request, 'core/situational_utterance/form.html', _form_context({'sel': sel}))
 
 
 def situational_utterance_detail(request, pk):

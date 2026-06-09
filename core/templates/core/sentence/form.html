@@ -22,11 +22,16 @@
         </div>
 
         <div class="form-control mb-6">
-          <label class="label"><span class="label-text font-medium">Language Code</span></label>
-          <input type="text" name="language_code" maxlength="3"
-            value="{{ values.language_code|default:'' }}"
-            class="input input-bordered font-mono w-24{% if errors.language_code %} input-error{% endif %}">
-          {% if errors.language_code %}<p class="text-error text-sm mt-1">{{ errors.language_code }}</p>{% endif %}
+          <label class="label"><span class="label-text font-medium">Language</span></label>
+          <select name="language_id" class="select select-bordered w-48{% if errors.language_id %} select-error{% endif %}">
+            <option value="">— select —</option>
+            {% for lang in languages %}
+            <option value="{{ lang.iso3 }}" {% if values.language_id == lang.iso3 %}selected{% endif %}>
+              {{ lang.name }} ({{ lang.iso3 }})
+            </option>
+            {% endfor %}
+          </select>
+          {% if errors.language_id %}<p class="text-error text-sm mt-1">{{ errors.language_id }}</p>{% endif %}
         </div>
 
         <div class="flex gap-2">
