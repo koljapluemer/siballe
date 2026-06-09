@@ -4,3 +4,7 @@ from .sentence import Sentence
 from .situation import Situation
 from .situational_utterance import SituationalUtterance
 from .speech_act import SpeechAct
+from .dialog_node import DialogNode
+from .dialog import Dialog
+from .dialog_utterance import DialogUtterance
+from .dialog_line import DialogLine

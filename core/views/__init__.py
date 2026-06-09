@@ -38,3 +38,25 @@ from .situational_utterance import (
     situational_utterance_list,
     situational_utterance_update,
 )
+from .dialog import (
+    dialog_create,
+    dialog_delete,
+    dialog_detail,
+    dialog_list,
+    dialog_update,
+)
+from .dialog_node import (
+    dialog_node_create,
+    dialog_node_delete,
+    dialog_node_update,
+)
+from .dialog_utterance import (
+    dialog_utterance_create,
+    dialog_utterance_delete,
+    dialog_utterance_update,
+)
+from .dialog_line import (
+    dialog_line_create,
+    dialog_line_delete,
+    dialog_line_update,
+)

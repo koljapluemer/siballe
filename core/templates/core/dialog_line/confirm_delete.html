@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Line{% endblock %}
+
+{% block content %}
+<div class="max-w-sm">
+  <div class="flex items-center gap-3 mb-4">
+    <a href="{% url 'core:dialog_detail' dialog.pk %}" class="btn btn-ghost btn-sm">&larr;</a>
+    <h1 class="text-2xl font-bold">Delete Line</h1>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body gap-4">
+      <p>Delete this line from utterance <strong>{{ obj.utterance.speech_act }}</strong>?</p>
+      <p class="text-sm font-mono text-base-content/60">{{ obj.sentence }}{% if obj.context %} ({{ obj.context }}){% endif %}</p>
+      <form method="post" class="flex gap-2">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-error">Delete</button>
+        <a href="{% url 'core:dialog_detail' dialog.pk %}" class="btn btn-ghost">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

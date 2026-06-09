@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}{% if obj %}Edit Line{% else %}New Line{% endif %}{% endblock %}
+
+{% block content %}
+{{ initial_data|json_script:"dl-init" }}
+
+<div class="max-w-xl" x-data="dlForm" x-cloak>
+  <div class="flex items-center gap-3 mb-4">
+    <a href="{% url 'core:dialog_detail' dialog.pk %}" class="btn btn-ghost btn-sm">&larr;</a>
+    <h1 class="text-2xl font-bold">{% if obj %}Edit Line{% else %}New Line{% endif %}</h1>
+  </div>
+
+  <div class="mb-4 p-3 bg-base-200 rounded-box text-sm flex flex-col gap-1">
+    <div>
+      <span class="text-base-content/60">node: </span>
+      <a href="{% url 'core:dialog_node_update' utterance.node.pk %}" class="font-medium link link-hover">{{ utterance.node.speaker }}</a>
+    </div>
+    <div>
+      <span class="text-base-content/60">utterance: </span>
+      <a href="{% url 'core:dialog_utterance_update' utterance.pk %}" class="font-medium link link-hover">{{ utterance.speech_act }}</a>
+    </div>
+    {% if siblings %}
+    <div class="text-base-content/60 text-xs mt-1">
+      sibling lines:
+      {% for s in siblings %}
+      <span class="font-mono">{{ s.sentence }}{% if s.context %} <span class="badge badge-ghost badge-xs">{{ s.context }}</span>{% endif %}</span>{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="utterance" value="{{ utterance.pk }}">
+        <input type="hidden" name="order" value="{{ values.order }}">
+
+        <div class="form-control mb-4">
+          <label class="label"><span class="label-text font-medium">Sentence</span></label>
+          <div class="relative">
+            <input type="text" x-model="snText" @input="onSnInput()" @blur="onSnBlur()"
+              @keydown.escape="snOpen = false"
+              class="input input-bordered w-full{% if errors.sentence %} input-error{% endif %}"
+              placeholder="Type to search or add new…" autocomplete="off">
+            <input type="hidden" name="sentence_id" x-model="snId">
+            <input type="hidden" name="sentence_text" x-model="snText">
+            <ul x-show="snOpen"
+              class="absolute z-20 left-0 right-0 bg-base-100 border border-base-300 rounded-box shadow-lg mt-1 max-h-52 overflow-y-auto">
+              <template x-for="item in snResults" :key="item.id">
+                <li @mousedown.prevent="pickSn(item)"
+                  class="px-3 py-2 text-sm cursor-pointer hover:bg-base-200"
+                  :class="{ 'bg-base-200 font-medium': String(item.id) === snId }"
+                  x-text="item.label"></li>
+              </template>
+              <li x-show="snText.trim() && !snExactMatch"
+                @mousedown.prevent="snOpen = false"
+                class="px-3 py-2 text-sm cursor-pointer hover:bg-base-200 text-primary border-t border-base-200">
+                ➕ Create: "<span x-text="snText.trim()"></span>"
+              </li>
+            </ul>
+          </div>
+          <p x-show="snId" class="text-xs text-success mt-1">↳ existing</p>
+          <p x-show="snText.trim() && !snId" class="text-xs text-base-content/40 mt-1">↳ will be created</p>
+          {% if errors.sentence %}<p class="text-error text-sm mt-1">{{ errors.sentence }}</p>{% endif %}
+        </div>
+
+        <div class="form-control mb-6">
+          <label class="label">
+            <span class="label-text font-medium">Context</span>
+            <span class="label-text-alt text-base-content/40">optional, e.g. "formal", "casual"</span>
+          </label>
+          <input type="text" name="context"
+            class="input input-bordered"
+            value="{{ values.context|default:'' }}"
+            placeholder="formal, casual, …">
+        </div>
+
+        <div class="flex gap-2">
+          <button type="submit" class="btn btn-primary">Save</button>
+          <a href="{% url 'core:dialog_detail' dialog.pk %}" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<style>[x-cloak] { display: none !important; }</style>
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('dlForm', () => {
+      const init = JSON.parse(document.getElementById('dl-init').textContent);
+      return {
+        snText: init.snText,
+        snId:   init.snId,
+        snOpen: false,
+        snResults: [],
+        snTimer: null,
+
+        onSnInput() {
+          this.snId = '';
+          clearTimeout(this.snTimer);
+          const q = this.snText.trim();
+          if (!q) { this.snResults = []; this.snOpen = false; return; }
+          this.snTimer = setTimeout(async () => {
+            const r = await fetch(`{% url 'core:sentence_search' %}?q=${encodeURIComponent(q)}`);
+            this.snResults = await r.json();
+            this.snOpen = true;
+          }, 200);
+        },
+        pickSn(item) { this.snText = item.label; this.snId = String(item.id); this.snOpen = false; },
+        onSnBlur() { setTimeout(() => { this.snOpen = false; }, 150); },
+        get snExactMatch() {
+          return this.snResults.some(r => r.label.toLowerCase() === this.snText.trim().toLowerCase());
+        },
+      };
+    });
+  });
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+{% endblock %}

@@ -18,3 +18,9 @@ uv run manage.py runserver
 uv run manage.py migrate
 uv run manage.py createsuperuser
 ```
+
+## Visualize models
+
+```bash
+uv run manage.py graph_models core -o models.png
+```

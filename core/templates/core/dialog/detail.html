@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}{{ obj.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+  <div class="flex items-center gap-3 mb-4">
+    <a href="{% url 'core:dialog_list' %}" class="btn btn-ghost btn-sm">&larr;</a>
+    <h1 class="text-2xl font-bold">{{ obj.name }}</h1>
+  </div>
+
+  <div class="card bg-base-100 shadow mb-6">
+    <div class="card-body gap-4">
+      <div class="flex flex-wrap gap-6">
+        <div>
+          <p class="text-sm text-base-content/60 mb-1">Situation</p>
+          <a href="{% url 'core:situation_detail' obj.situation.pk %}" class="link link-hover">{{ obj.situation }}</a>
+        </div>
+        <div>
+          <p class="text-sm text-base-content/60 mb-2">Speakers</p>
+          <div class="flex flex-wrap gap-1">
+            {% for speaker in obj.speakers %}
+            <span class="badge badge-outline">{{ speaker }}</span>
+            {% empty %}
+            <span class="text-sm text-base-content/40">None</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="card-actions pt-2 border-t border-base-200">
+        <a href="{% url 'core:dialog_update' obj.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+        <a href="{% url 'core:dialog_delete' obj.pk %}" class="btn btn-error btn-outline btn-sm">Delete</a>
+      </div>
+    </div>
+  </div>
+
+  {% if mermaid_src %}
+  <div class="card bg-base-100 shadow mb-6">
+    <div class="card-body">
+      <h2 class="text-sm font-semibold text-base-content/60 mb-2">Graph</h2>
+      <pre class="mermaid text-sm">{{ mermaid_src }}</pre>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-lg font-semibold">Nodes</h2>
+    <a href="{% url 'core:dialog_node_create' %}?dialog={{ obj.pk }}" class="btn btn-primary btn-sm">+ Add node</a>
+  </div>
+
+  {% for node in obj.nodes.all %}
+  <div class="card bg-base-100 shadow mb-4">
+    <div class="card-body py-3 px-4 gap-2">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          {% if obj.start_node_id == node.pk %}<span class="badge badge-primary badge-sm">start</span>{% endif %}
+          <span class="font-medium">{{ node.speaker }}</span>
+        </div>
+        <div class="flex gap-1 shrink-0">
+          <a href="{% url 'core:dialog_node_update' node.pk %}" class="btn btn-ghost btn-xs">Edit</a>
+          <a href="{% url 'core:dialog_node_delete' node.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
+          <a href="{% url 'core:dialog_utterance_create' %}?node={{ node.pk }}" class="btn btn-ghost btn-xs text-primary">+ utterance</a>
+        </div>
+      </div>
+
+      {% for u in node.utterances.all %}
+      <div class="ml-4 pl-3 border-l-2 border-base-200">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-sm font-medium">{{ u.speech_act }}</span>
+            {% if u.next_node %}
+            <span class="text-xs text-base-content/50">→ {{ u.next_node.speaker }}</span>
+            {% else %}
+            <span class="text-xs text-base-content/40">→ end</span>
+            {% endif %}
+          </div>
+          <div class="flex gap-1 shrink-0">
+            <a href="{% url 'core:dialog_utterance_update' u.pk %}" class="btn btn-ghost btn-xs">Edit</a>
+            <a href="{% url 'core:dialog_utterance_delete' u.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
+            <a href="{% url 'core:dialog_line_create' %}?utterance={{ u.pk }}" class="btn btn-ghost btn-xs text-primary">+ line</a>
+          </div>
+        </div>
+
+        {% for line in u.lines.all %}
+        <div class="ml-4 pl-3 border-l border-base-200 mt-1 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-sm font-mono truncate">{{ line.sentence }}</span>
+            {% if line.context %}<span class="badge badge-ghost badge-sm shrink-0">{{ line.context }}</span>{% endif %}
+          </div>
+          <div class="flex gap-1 shrink-0">
+            <a href="{% url 'core:dialog_line_update' line.pk %}" class="btn btn-ghost btn-xs">Edit</a>
+            <a href="{% url 'core:dialog_line_delete' line.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% empty %}
+      <p class="ml-4 text-xs text-base-content/40">No utterances yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-sm text-base-content/50">No nodes yet. Add the first node to start building the dialog.</p>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+</script>
+{% endblock %}

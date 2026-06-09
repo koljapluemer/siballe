@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Dialogs{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-2xl font-bold">Dialogs</h1>
+    <a href="{% url 'core:dialog_create' %}" class="btn btn-primary btn-sm">+ New</a>
+  </div>
+
+  {% if dialogs %}
+  <div class="flex flex-col gap-2">
+    {% for d in dialogs %}
+    <div class="card bg-base-100 shadow-sm">
+      <div class="card-body py-3 px-4 flex-row items-center justify-between gap-4">
+        <div class="min-w-0">
+          <p class="font-medium truncate">{{ d.name }}</p>
+          <p class="text-xs text-base-content/50">{{ d.situation }} &middot; {{ d.speakers|length }} speaker{{ d.speakers|length|pluralize }}</p>
+        </div>
+        <a href="{% url 'core:dialog_detail' d.pk %}" class="btn btn-ghost btn-sm shrink-0">View</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-sm text-base-content/50">No dialogs yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
