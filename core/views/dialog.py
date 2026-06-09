@@ -20,24 +20,43 @@ def _parse_speakers(raw):
     return [line.strip() for line in raw.splitlines() if line.strip()]
 
 
+def _md(text):
+    return text.replace('`', "'").replace('"', "'")
+
+
 def _build_mermaid(dialog):
-    nodes = list(dialog.nodes.prefetch_related('utterances__speech_act', 'utterances__next_node'))
-    if not nodes:
+    utterances = list(
+        dialog.utterances
+        .select_related('speech_act', 'previous_utterance')
+        .prefetch_related('lines__sentence')
+        .order_by('pk')
+    )
+    if not utterances:
         return ''
+    utt_ids = {u.pk for u in utterances}
     lines = ['flowchart TD']
-    node_ids = {n.pk for n in nodes}
     end_counter = 0
-    for node in nodes:
-        start_marker = ' ◀' if dialog.start_node_id == node.pk else ''
-        lines.append(f'  N{node.pk}["{node.speaker}{start_marker}"]')
-        for u in node.utterances.all():
-            sa = u.speech_act.description[:25].replace('"', "'")
-            if u.next_node_id and u.next_node_id in node_ids:
-                lines.append(f'  N{node.pk} -->|"{sa}"| N{u.next_node_id}')
-            else:
-                end_counter += 1
-                lines.append(f'  END{end_counter}(( ))')
-                lines.append(f'  N{node.pk} -->|"{sa}"| END{end_counter}')
+    roots = [u for u in utterances if u.previous_utterance_id is None]
+    non_roots = [u for u in utterances if u.previous_utterance_id is not None]
+
+    for u in utterances:
+        start_marker = ' ◀' if dialog.start_utterance_id == u.pk else ''
+        parts = [f'**{_md(u.speaker)}{start_marker}**', f'*{_md(u.speech_act.description)}*']
+        for ln in sorted(u.lines.all(), key=lambda l: l.order):
+            parts.append(_md(ln.sentence.content))
+        label = '\n'.join(parts)
+        lines.append(f'  U{u.pk}["`{label}`"]')
+
+    for u in non_roots:
+        if u.previous_utterance_id in utt_ids:
+            lines.append(f'  U{u.previous_utterance_id} --> U{u.pk}')
+
+    if not non_roots and roots:
+        for u in roots:
+            end_counter += 1
+            lines.append(f'  END{end_counter}(( ))')
+            lines.append(f'  U{u.pk} --> END{end_counter}')
+
     return '\n'.join(lines)
 
 
@@ -72,9 +91,9 @@ def dialog_create(request):
 def dialog_detail(request, pk):
     obj = get_object_or_404(
         Dialog.objects.select_related('situation').prefetch_related(
-            'nodes__utterances__speech_act',
-            'nodes__utterances__next_node',
-            'nodes__utterances__lines__sentence',
+            'utterances__speech_act',
+            'utterances__previous_utterance',
+            'utterances__lines__sentence',
         ),
         pk=pk,
     )
@@ -86,7 +105,7 @@ def dialog_detail(request, pk):
 
 def dialog_update(request, pk):
     obj = get_object_or_404(Dialog, pk=pk)
-    nodes = obj.nodes.all()
+    utterances = obj.utterances.select_related('speech_act').order_by('pk')
     if request.method == 'POST':
         values, errors = _validate(request.POST)
         if not errors:
@@ -94,18 +113,18 @@ def dialog_update(request, pk):
             obj.situation = situation
             obj.name = values['name']
             obj.speakers = _parse_speakers(values['speakers_raw'])
-            start_node_id = request.POST.get('start_node') or None
-            obj.start_node_id = start_node_id
+            start_utterance_id = request.POST.get('start_utterance') or None
+            obj.start_utterance_id = start_utterance_id
             obj.save()
             return redirect('core:dialog_detail', pk=obj.pk)
         return render(request, 'core/dialog/form.html', {
             'values': values,
             'errors': errors,
             'obj': obj,
-            'nodes': nodes,
+            'utterances': utterances,
             'situations': Situation.objects.all().order_by('id'),
             'selected_situation': request.POST.get('situation', ''),
-            'selected_start_node': request.POST.get('start_node', ''),
+            'selected_start_utterance': request.POST.get('start_utterance', ''),
         })
     values = {
         'name': obj.name,
@@ -114,10 +133,10 @@ def dialog_update(request, pk):
     return render(request, 'core/dialog/form.html', {
         'values': values,
         'obj': obj,
-        'nodes': nodes,
+        'utterances': utterances,
         'situations': Situation.objects.all().order_by('id'),
         'selected_situation': str(obj.situation_id),
-        'selected_start_node': str(obj.start_node_id) if obj.start_node_id else '',
+        'selected_start_utterance': str(obj.start_utterance_id) if obj.start_utterance_id else '',
     })
 
 

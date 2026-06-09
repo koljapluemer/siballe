@@ -8,7 +8,7 @@ def _resolve_sentence(post, utterance):
     sn_text = post.get('sentence_text', '').strip()
     if sn_id:
         return get_object_or_404(Sentence, pk=sn_id), None
-    language_id = utterance.node.dialog.situation.language_id
+    language_id = utterance.dialog.situation.language_id
     if not language_id:
         return None, "The dialog's situation has no language — cannot auto-create a sentence."
     sn, _ = Sentence.objects.get_or_create(content=sn_text, language_id=language_id)
@@ -30,10 +30,10 @@ def _next_order(utterance_id):
 def dialog_line_create(request):
     utterance_id = request.POST.get('utterance') or request.GET.get('utterance', '')
     utterance = get_object_or_404(
-        DialogUtterance.objects.select_related('node__dialog__situation', 'speech_act'),
+        DialogUtterance.objects.select_related('dialog__situation', 'speech_act'),
         pk=utterance_id,
     )
-    dialog = utterance.node.dialog
+    dialog = utterance.dialog
 
     if request.method == 'POST':
         errors = {}
@@ -73,11 +73,11 @@ def dialog_line_create(request):
 
 def dialog_line_update(request, pk):
     obj = get_object_or_404(
-        DialogLine.objects.select_related('utterance__node__dialog__situation', 'utterance__speech_act', 'sentence'),
+        DialogLine.objects.select_related('utterance__dialog__situation', 'utterance__speech_act', 'sentence'),
         pk=pk,
     )
     utterance = obj.utterance
-    dialog = utterance.node.dialog
+    dialog = utterance.dialog
 
     if request.method == 'POST':
         errors = {}
@@ -116,8 +116,8 @@ def dialog_line_update(request, pk):
 
 
 def dialog_line_delete(request, pk):
-    obj = get_object_or_404(DialogLine.objects.select_related('utterance__node__dialog'), pk=pk)
-    dialog = obj.utterance.node.dialog
+    obj = get_object_or_404(DialogLine.objects.select_related('utterance__dialog'), pk=pk)
+    dialog = obj.utterance.dialog
     if request.method == 'POST':
         obj.delete()
         return redirect('core:dialog_detail', pk=dialog.pk)

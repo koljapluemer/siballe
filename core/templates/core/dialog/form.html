@@ -43,13 +43,13 @@
             placeholder="Alice&#10;Bob">{{ values.speakers_raw|default:'' }}</textarea>
         </div>
 
-        {% if obj and nodes %}
+        {% if obj and utterances %}
         <div class="form-control mb-6">
-          <label class="label"><span class="label-text font-medium">Start node <span class="text-base-content/40 font-normal">(optional)</span></span></label>
-          <select name="start_node" class="select select-bordered">
+          <label class="label"><span class="label-text font-medium">Start utterance <span class="text-base-content/40 font-normal">(optional)</span></span></label>
+          <select name="start_utterance" class="select select-bordered">
             <option value="">— none —</option>
-            {% for node in nodes %}
-            <option value="{{ node.pk }}"{% if selected_start_node == node.pk|stringformat:"s" %} selected{% endif %}>{{ node.speaker }}</option>
+            {% for u in utterances %}
+            <option value="{{ u.pk }}"{% if selected_start_utterance == u.pk|stringformat:"s" %} selected{% endif %}>{{ u.speaker }}: {{ u.speech_act }}</option>
             {% endfor %}
           </select>
         </div>

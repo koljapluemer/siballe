@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
 
-from core.models import DialogNode, DialogUtterance, SpeechAct
+from core.models import Dialog, DialogUtterance, SpeechAct
 
 
 def _resolve_speech_act(post):
@@ -20,70 +20,84 @@ def _initial_data(sel):
 
 
 def dialog_utterance_create(request):
-    node_id = request.POST.get('node') or request.GET.get('node', '')
-    node = get_object_or_404(DialogNode.objects.select_related('dialog'), pk=node_id)
-    dialog = node.dialog
-    dialog_nodes = dialog.nodes.all()
+    dialog_id = request.POST.get('dialog') or request.GET.get('dialog', '')
+    dialog = get_object_or_404(Dialog, pk=dialog_id)
+    dialog_utterances = dialog.utterances.select_related('speech_act').order_by('pk')
 
     if request.method == 'POST':
         errors = {}
+        speaker = request.POST.get('speaker', '').strip()
+        if not speaker:
+            errors['speaker'] = 'Required.'
         if not request.POST.get('speech_act_text', '').strip():
             errors['speech_act'] = 'Required.'
         if not errors:
             speech_act = _resolve_speech_act(request.POST)
-            next_node_id = request.POST.get('next_node') or None
-            DialogUtterance.objects.create(
-                node=node,
+            previous_utterance_id = request.POST.get('previous_utterance') or None
+            obj = DialogUtterance.objects.create(
+                dialog=dialog,
+                speaker=speaker,
                 speech_act=speech_act,
-                next_node_id=next_node_id,
+                previous_utterance_id=previous_utterance_id,
             )
+            if dialog.start_utterance_id is None:
+                dialog.start_utterance = obj
+                dialog.save(update_fields=['start_utterance'])
             return redirect('core:dialog_detail', pk=dialog.pk)
         sel = {k: request.POST.get(k, '') for k in ('speech_act_id', 'speech_act_text')}
         return render(request, 'core/dialog_utterance/form.html', {
-            'node': node, 'dialog': dialog, 'dialog_nodes': dialog_nodes,
+            'dialog': dialog,
+            'dialog_utterances': dialog_utterances,
             'errors': errors,
             'initial_data': _initial_data(sel),
-            'selected_next_node': request.POST.get('next_node', ''),
-            'siblings': node.utterances.select_related('speech_act'),
-            'predecessors': DialogUtterance.objects.filter(next_node=node).select_related('node', 'speech_act'),
+            'selected_previous_utterance': request.POST.get('previous_utterance', ''),
+            'values': {'speaker': speaker},
         })
 
     return render(request, 'core/dialog_utterance/form.html', {
-        'node': node, 'dialog': dialog, 'dialog_nodes': dialog_nodes,
+        'dialog': dialog,
+        'dialog_utterances': dialog_utterances,
         'initial_data': _initial_data({}),
-        'siblings': node.utterances.select_related('speech_act'),
-        'predecessors': DialogUtterance.objects.filter(next_node=node).select_related('node', 'speech_act'),
+        'values': {},
+        'selected_previous_utterance': request.GET.get('previous_utterance', ''),
     })
 
 
 def dialog_utterance_update(request, pk):
     obj = get_object_or_404(
-        DialogUtterance.objects.select_related('node__dialog', 'speech_act', 'next_node'),
+        DialogUtterance.objects.select_related('dialog', 'speech_act', 'previous_utterance'),
         pk=pk,
     )
-    node = obj.node
-    dialog = node.dialog
-    dialog_nodes = dialog.nodes.all()
+    dialog = obj.dialog
+    dialog_utterances = dialog.utterances.select_related('speech_act').order_by('pk')
+    siblings = dialog_utterances.filter(previous_utterance=obj.previous_utterance).exclude(pk=obj.pk)
+    following = dialog_utterances.filter(previous_utterance=obj)
 
     if request.method == 'POST':
         errors = {}
+        speaker = request.POST.get('speaker', '').strip()
+        if not speaker:
+            errors['speaker'] = 'Required.'
         if not request.POST.get('speech_act_text', '').strip():
             errors['speech_act'] = 'Required.'
         if not errors:
             speech_act = _resolve_speech_act(request.POST)
-            next_node_id = request.POST.get('next_node') or None
+            previous_utterance_id = request.POST.get('previous_utterance') or None
+            obj.speaker = speaker
             obj.speech_act = speech_act
-            obj.next_node_id = next_node_id
+            obj.previous_utterance_id = previous_utterance_id
             obj.save()
             return redirect('core:dialog_detail', pk=dialog.pk)
         sel = {k: request.POST.get(k, '') for k in ('speech_act_id', 'speech_act_text')}
         return render(request, 'core/dialog_utterance/form.html', {
-            'obj': obj, 'node': node, 'dialog': dialog, 'dialog_nodes': dialog_nodes,
+            'obj': obj, 'dialog': dialog,
+            'dialog_utterances': dialog_utterances,
             'errors': errors,
             'initial_data': _initial_data(sel),
-            'selected_next_node': request.POST.get('next_node', ''),
-            'siblings': node.utterances.exclude(pk=obj.pk).select_related('speech_act'),
-            'predecessors': DialogUtterance.objects.filter(next_node=node).select_related('node', 'speech_act'),
+            'selected_previous_utterance': request.POST.get('previous_utterance', ''),
+            'values': {'speaker': speaker},
+            'siblings': siblings,
+            'following': following,
         })
 
     sel = {
@@ -91,18 +105,23 @@ def dialog_utterance_update(request, pk):
         'speech_act_id': str(obj.speech_act_id),
     }
     return render(request, 'core/dialog_utterance/form.html', {
-        'obj': obj, 'node': node, 'dialog': dialog, 'dialog_nodes': dialog_nodes,
+        'obj': obj, 'dialog': dialog,
+        'dialog_utterances': dialog_utterances,
         'initial_data': _initial_data(sel),
-        'selected_next_node': str(obj.next_node_id) if obj.next_node_id else '',
-        'siblings': node.utterances.exclude(pk=obj.pk).select_related('speech_act'),
-        'predecessors': DialogUtterance.objects.filter(next_node=node).select_related('node', 'speech_act'),
+        'selected_previous_utterance': str(obj.previous_utterance_id) if obj.previous_utterance_id else '',
+        'values': {'speaker': obj.speaker},
+        'siblings': siblings,
+        'following': following,
     })
 
 
 def dialog_utterance_delete(request, pk):
-    obj = get_object_or_404(DialogUtterance.objects.select_related('node__dialog'), pk=pk)
-    dialog = obj.node.dialog
+    obj = get_object_or_404(DialogUtterance.objects.select_related('dialog'), pk=pk)
+    dialog = obj.dialog
     if request.method == 'POST':
+        if dialog.start_utterance_id == obj.pk:
+            dialog.start_utterance = None
+            dialog.save(update_fields=['start_utterance'])
         obj.delete()
         return redirect('core:dialog_detail', pk=dialog.pk)
     return render(request, 'core/dialog_utterance/confirm_delete.html', {'obj': obj, 'dialog': dialog})

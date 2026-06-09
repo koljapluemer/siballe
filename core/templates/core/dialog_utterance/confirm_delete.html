@@ -11,8 +11,8 @@
 
   <div class="card bg-base-100 shadow">
     <div class="card-body gap-4">
-      <p>Delete utterance <strong>{{ obj.speech_act }}</strong> from node <strong>{{ obj.node.speaker }}</strong>?</p>
-      <p class="text-sm text-base-content/60">All lines on this utterance will also be deleted.</p>
+      <p>Delete utterance <strong>{{ obj.speech_act }}</strong> by <strong>{{ obj.speaker }}</strong> from <strong>{{ dialog.name }}</strong>?</p>
+      <p class="text-sm text-base-content/60">All lines on this utterance will also be deleted. Utterances that followed this one will become start-level (no predecessor).</p>
       <form method="post" class="flex gap-2">
         {% csrf_token %}
         <button type="submit" class="btn btn-error">Delete</button>

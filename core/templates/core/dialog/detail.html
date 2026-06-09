@@ -44,63 +44,48 @@
   {% endif %}
 
   <div class="flex items-center justify-between mb-3">
-    <h2 class="text-lg font-semibold">Nodes</h2>
-    <a href="{% url 'core:dialog_node_create' %}?dialog={{ obj.pk }}" class="btn btn-primary btn-sm">+ Add node</a>
+    <h2 class="text-lg font-semibold">Utterances</h2>
+    <a href="{% url 'core:dialog_utterance_create' %}?dialog={{ obj.pk }}" class="btn btn-primary btn-sm">+ Add utterance</a>
   </div>
 
-  {% for node in obj.nodes.all %}
-  <div class="card bg-base-100 shadow mb-4">
+  {% for u in obj.utterances.all %}
+  <div class="card bg-base-100 shadow mb-3">
     <div class="card-body py-3 px-4 gap-2">
       <div class="flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2">
-          {% if obj.start_node_id == node.pk %}<span class="badge badge-primary badge-sm">start</span>{% endif %}
-          <span class="font-medium">{{ node.speaker }}</span>
+        <div class="flex items-center gap-2 flex-wrap">
+          {% if obj.start_utterance_id == u.pk %}<span class="badge badge-primary badge-sm">start</span>{% endif %}
+          <span class="badge badge-outline badge-sm">{{ u.speaker }}</span>
+          <span class="font-medium">{{ u.speech_act }}</span>
+          {% if u.previous_utterance %}
+          <span class="text-xs text-base-content/40">← {{ u.previous_utterance.speech_act }}</span>
+          {% else %}
+          <span class="text-xs text-base-content/40">← start</span>
+          {% endif %}
         </div>
         <div class="flex gap-1 shrink-0">
-          <a href="{% url 'core:dialog_node_update' node.pk %}" class="btn btn-ghost btn-xs">Edit</a>
-          <a href="{% url 'core:dialog_node_delete' node.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
-          <a href="{% url 'core:dialog_utterance_create' %}?node={{ node.pk }}" class="btn btn-ghost btn-xs text-primary">+ utterance</a>
+          <a href="{% url 'core:dialog_utterance_update' u.pk %}" class="btn btn-ghost btn-xs">Edit</a>
+          <a href="{% url 'core:dialog_utterance_delete' u.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
+          <a href="{% url 'core:dialog_utterance_create' %}?dialog={{ obj.pk }}&previous_utterance={{ u.pk }}" class="btn btn-ghost btn-xs text-secondary">+ follow-up</a>
+          <a href="{% url 'core:dialog_line_create' %}?utterance={{ u.pk }}" class="btn btn-ghost btn-xs text-primary">+ line</a>
         </div>
       </div>
 
-      {% for u in node.utterances.all %}
-      <div class="ml-4 pl-3 border-l-2 border-base-200">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-sm font-medium">{{ u.speech_act }}</span>
-            {% if u.next_node %}
-            <span class="text-xs text-base-content/50">→ {{ u.next_node.speaker }}</span>
-            {% else %}
-            <span class="text-xs text-base-content/40">→ end</span>
-            {% endif %}
-          </div>
-          <div class="flex gap-1 shrink-0">
-            <a href="{% url 'core:dialog_utterance_update' u.pk %}" class="btn btn-ghost btn-xs">Edit</a>
-            <a href="{% url 'core:dialog_utterance_delete' u.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
-            <a href="{% url 'core:dialog_line_create' %}?utterance={{ u.pk }}" class="btn btn-ghost btn-xs text-primary">+ line</a>
-          </div>
+      {% for line in u.lines.all %}
+      <div class="ml-4 pl-3 border-l border-base-200 mt-1 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="text-sm font-mono truncate">{{ line.sentence }}</span>
+          {% if line.context %}<span class="badge badge-ghost badge-sm shrink-0">{{ line.context }}</span>{% endif %}
         </div>
-
-        {% for line in u.lines.all %}
-        <div class="ml-4 pl-3 border-l border-base-200 mt-1 flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="text-sm font-mono truncate">{{ line.sentence }}</span>
-            {% if line.context %}<span class="badge badge-ghost badge-sm shrink-0">{{ line.context }}</span>{% endif %}
-          </div>
-          <div class="flex gap-1 shrink-0">
-            <a href="{% url 'core:dialog_line_update' line.pk %}" class="btn btn-ghost btn-xs">Edit</a>
-            <a href="{% url 'core:dialog_line_delete' line.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
-          </div>
+        <div class="flex gap-1 shrink-0">
+          <a href="{% url 'core:dialog_line_update' line.pk %}" class="btn btn-ghost btn-xs">Edit</a>
+          <a href="{% url 'core:dialog_line_delete' line.pk %}" class="btn btn-ghost btn-xs text-error">Delete</a>
         </div>
-        {% endfor %}
       </div>
-      {% empty %}
-      <p class="ml-4 text-xs text-base-content/40">No utterances yet.</p>
       {% endfor %}
     </div>
   </div>
   {% empty %}
-  <p class="text-sm text-base-content/50">No nodes yet. Add the first node to start building the dialog.</p>
+  <p class="text-sm text-base-content/50">No utterances yet. Add the first utterance to start building the dialog.</p>
   {% endfor %}
 </div>
 {% endblock %}

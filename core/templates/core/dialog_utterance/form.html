@@ -11,39 +11,51 @@
     <h1 class="text-2xl font-bold">{% if obj %}Edit Utterance{% else %}New Utterance{% endif %}</h1>
   </div>
 
+  {% if obj %}
   <div class="mb-4 p-3 bg-base-200 rounded-box text-sm flex flex-col gap-1">
-    {% if predecessors %}
-    <div class="text-base-content/60">
-      ← from:
-      {% for u in predecessors %}
-      <a href="{% url 'core:dialog_node_update' u.node.pk %}" class="badge badge-ghost badge-sm link link-hover">{{ u.node.speaker }}</a>
-      {% endfor %}
-    </div>
-    {% else %}
-    <span class="text-base-content/40">← no predecessors to this node</span>
-    {% endif %}
-    <div>
-      <span class="font-medium">▶ {{ node.speaker }}</span>
-      <a href="{% url 'core:dialog_node_update' node.pk %}" class="ml-1 text-xs link link-hover text-base-content/50">(edit node)</a>
-    </div>
     {% if siblings %}
-    <div class="text-base-content/60 text-xs ml-4">
+    <div class="text-base-content/60 text-xs">
       siblings:
       {% for s in siblings %}
-      <a href="{% url 'core:dialog_utterance_update' s.pk %}" class="link link-hover">{{ s.speech_act }}</a>{% if not forloop.last %}, {% endif %}
+      <a href="{% url 'core:dialog_utterance_update' s.pk %}" class="link link-hover">{{ s.speaker }}: {{ s.speech_act }}</a>{% if not forloop.last %}, {% endif %}
       {% endfor %}
     </div>
     {% endif %}
-    {% if obj %}
-    <div class="font-medium ml-4">↓ <strong>{{ obj.speech_act }}</strong> <span class="text-base-content/40 text-xs">(current)</span></div>
+    <div class="font-medium">▶ <strong>{{ obj.speaker }}: {{ obj.speech_act }}</strong> <span class="text-base-content/40 text-xs">(current)</span></div>
+    {% if following %}
+    <div class="text-base-content/60 text-xs ml-4">
+      ↓ next:
+      {% for f in following %}
+      <a href="{% url 'core:dialog_utterance_update' f.pk %}" class="link link-hover">{{ f.speaker }}: {{ f.speech_act }}</a>{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </div>
     {% endif %}
   </div>
+  {% endif %}
 
   <div class="card bg-base-100 shadow">
     <div class="card-body">
       <form method="post" novalidate>
         {% csrf_token %}
-        <input type="hidden" name="node" value="{{ node.pk }}">
+        <input type="hidden" name="dialog" value="{{ dialog.pk }}">
+
+        <div class="form-control mb-4">
+          <label class="label"><span class="label-text font-medium">Speaker</span></label>
+          {% if dialog.speakers %}
+          <div class="flex flex-wrap gap-3 mt-1">
+            {% for speaker in dialog.speakers %}
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="speaker" value="{{ speaker }}" class="radio radio-primary"
+                {% if values.speaker == speaker %}checked{% endif %}>
+              <span class="text-sm">{{ speaker }}</span>
+            </label>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="text-sm text-warning mt-1">This dialog has no speakers defined. <a href="{% url 'core:dialog_update' dialog.pk %}" class="link">Add speakers first.</a></p>
+          {% endif %}
+          {% if errors.speaker %}<p class="text-error text-sm mt-1">{{ errors.speaker }}</p>{% endif %}
+        </div>
 
         <div class="form-control mb-4">
           <label class="label"><span class="label-text font-medium">Speech Act</span></label>
@@ -76,14 +88,14 @@
 
         <div class="form-control mb-6">
           <label class="label">
-            <span class="label-text font-medium">Next node</span>
-            <span class="label-text-alt text-base-content/40">leave blank = end of dialog</span>
+            <span class="label-text font-medium">Follows after</span>
+            <span class="label-text-alt text-base-content/40">leave blank = start of dialog</span>
           </label>
-          <select name="next_node" class="select select-bordered">
-            <option value="">— end —</option>
-            {% for n in dialog_nodes %}
-            {% if n.pk != node.pk %}
-            <option value="{{ n.pk }}"{% if selected_next_node == n.pk|stringformat:"s" %} selected{% endif %}>{{ n.speaker }}</option>
+          <select name="previous_utterance" class="select select-bordered">
+            <option value="">— start —</option>
+            {% for u in dialog_utterances %}
+            {% if not obj or u.pk != obj.pk %}
+            <option value="{{ u.pk }}"{% if selected_previous_utterance == u.pk|stringformat:"s" %} selected{% endif %}>{{ u.speaker }}: {{ u.speech_act }}</option>
             {% endif %}
             {% endfor %}
           </select>

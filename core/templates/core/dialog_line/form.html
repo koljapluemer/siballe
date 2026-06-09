@@ -13,11 +13,8 @@
 
   <div class="mb-4 p-3 bg-base-200 rounded-box text-sm flex flex-col gap-1">
     <div>
-      <span class="text-base-content/60">node: </span>
-      <a href="{% url 'core:dialog_node_update' utterance.node.pk %}" class="font-medium link link-hover">{{ utterance.node.speaker }}</a>
-    </div>
-    <div>
       <span class="text-base-content/60">utterance: </span>
+      <span class="badge badge-outline badge-sm">{{ utterance.speaker }}</span>
       <a href="{% url 'core:dialog_utterance_update' utterance.pk %}" class="font-medium link link-hover">{{ utterance.speech_act }}</a>
     </div>
     {% if siblings %}
