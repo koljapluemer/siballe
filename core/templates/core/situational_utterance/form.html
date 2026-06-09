@@ -3,7 +3,9 @@
 {% block title %}{% if obj %}Edit Utterance{% else %}New Utterance{% endif %}{% endblock %}
 
 {% block content %}
-<div class="max-w-xl">
+{{ initial_data|json_script:"uf-init" }}
+
+<div class="max-w-xl" x-data="utteranceForm" x-cloak>
   <div class="flex items-center gap-3 mb-4">
     <a href="{% if obj %}{% url 'core:situational_utterance_detail' obj.pk %}{% else %}{% url 'core:situational_utterance_list' %}{% endif %}" class="btn btn-ghost btn-sm">&larr;</a>
     <h1 class="text-2xl font-bold">{% if obj %}Edit Utterance{% else %}New Utterance{% endif %}</h1>
@@ -16,10 +18,13 @@
 
         <div class="form-control mb-4">
           <label class="label"><span class="label-text font-medium">Situation</span></label>
-          <select name="situation" class="select select-bordered{% if errors.situation %} select-error{% endif %}">
+          <select name="situation"
+            class="select select-bordered{% if errors.situation %} select-error{% endif %}"
+            @change="onSituationChange($event)">
             <option value="">— select —</option>
             {% for sit in situations %}
-            <option value="{{ sit.pk }}"{% if sit.pk|stringformat:"s" == sel.situation %}selected{% endif %}>{{ sit }}</option>
+            <option value="{{ sit.pk }}"
+              :selected="situationId === '{{ sit.pk }}'">{{ sit }}</option>
             {% endfor %}
           </select>
           {% if errors.situation %}<p class="text-error text-sm mt-1">{{ errors.situation }}</p>{% endif %}
@@ -27,29 +32,65 @@
 
         <div class="form-control mb-4">
           <label class="label"><span class="label-text font-medium">Speech Act</span></label>
-          <select name="speech_act" class="select select-bordered{% if errors.speech_act %} select-error{% endif %}">
-            <option value="">— select —</option>
-            {% for sa in speech_acts %}
-            <option value="{{ sa.pk }}"{% if sa.pk|stringformat:"s" == sel.speech_act %}selected{% endif %}>{{ sa }}</option>
-            {% endfor %}
-          </select>
+          <div class="relative">
+            <input type="text" x-model="saText" @input="onSaInput()" @blur="onSaBlur()"
+              @keydown.escape="saOpen = false"
+              class="input input-bordered w-full{% if errors.speech_act %} input-error{% endif %}"
+              placeholder="Type to search or add new…" autocomplete="off">
+            <input type="hidden" name="speech_act_id" x-model="saId">
+            <input type="hidden" name="speech_act_text" x-model="saText">
+            <ul x-show="saOpen"
+              class="absolute z-20 left-0 right-0 bg-base-100 border border-base-300 rounded-box shadow-lg mt-1 max-h-52 overflow-y-auto">
+              <template x-for="item in saResults" :key="item.id">
+                <li @mousedown.prevent="pickSa(item)"
+                  class="px-3 py-2 text-sm cursor-pointer hover:bg-base-200"
+                  :class="{ 'bg-base-200 font-medium': String(item.id) === saId }"
+                  x-text="item.label"></li>
+              </template>
+              <li x-show="saText.trim() && !saExactMatch"
+                @mousedown.prevent="saOpen = false"
+                class="px-3 py-2 text-sm cursor-pointer hover:bg-base-200 text-primary border-t border-base-200">
+                ➕ Create: "<span x-text="saText.trim()"></span>"
+              </li>
+            </ul>
+          </div>
+          <p x-show="saId" class="text-xs text-success mt-1">↳ existing</p>
+          <p x-show="saText.trim() && !saId" class="text-xs text-base-content/40 mt-1">↳ will be created</p>
           {% if errors.speech_act %}<p class="text-error text-sm mt-1">{{ errors.speech_act }}</p>{% endif %}
         </div>
 
         <div class="form-control mb-4">
           <label class="label"><span class="label-text font-medium">Sentence</span></label>
-          <select name="sentence" class="select select-bordered{% if errors.sentence %} select-error{% endif %}">
-            <option value="">— select —</option>
-            {% for s in sentences %}
-            <option value="{{ s.pk }}"{% if s.pk|stringformat:"s" == sel.sentence %}selected{% endif %}>{{ s }}</option>
-            {% endfor %}
-          </select>
+          <div class="relative">
+            <input type="text" x-model="snText" @input="onSnInput()" @blur="onSnBlur()"
+              @keydown.escape="snOpen = false"
+              class="input input-bordered w-full{% if errors.sentence %} input-error{% endif %}"
+              placeholder="Type to search or add new…" autocomplete="off">
+            <input type="hidden" name="sentence_id" x-model="snId">
+            <input type="hidden" name="sentence_text" x-model="snText">
+            <ul x-show="snOpen"
+              class="absolute z-20 left-0 right-0 bg-base-100 border border-base-300 rounded-box shadow-lg mt-1 max-h-52 overflow-y-auto">
+              <template x-for="item in snResults" :key="item.id">
+                <li @mousedown.prevent="pickSn(item)"
+                  class="px-3 py-2 text-sm cursor-pointer hover:bg-base-200"
+                  :class="{ 'bg-base-200 font-medium': String(item.id) === snId }"
+                  x-text="item.label"></li>
+              </template>
+              <li x-show="snText.trim() && !snExactMatch"
+                @mousedown.prevent="snOpen = false"
+                class="px-3 py-2 text-sm cursor-pointer hover:bg-base-200 text-primary border-t border-base-200">
+                ➕ Create: "<span x-text="snText.trim()"></span>"
+              </li>
+            </ul>
+          </div>
+          <p x-show="snId" class="text-xs text-success mt-1">↳ existing</p>
+          <p x-show="snText.trim() && !snId" class="text-xs text-base-content/40 mt-1">↳ will be created</p>
           {% if errors.sentence %}<p class="text-error text-sm mt-1">{{ errors.sentence }}</p>{% endif %}
         </div>
 
         <div class="form-control mb-6">
-          <label class="label"><span class="label-text font-medium">Context</span></label>
-          <textarea name="context" rows="4"
+          <label class="label"><span class="label-text font-medium">Context <span class="text-base-content/40 font-normal">(optional)</span></span></label>
+          <textarea name="context" rows="3"
             class="textarea textarea-bordered{% if errors.context %} textarea-error{% endif %}">{{ values.context|default:'' }}</textarea>
           {% if errors.context %}<p class="text-error text-sm mt-1">{{ errors.context }}</p>{% endif %}
         </div>
@@ -63,4 +104,72 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<style>[x-cloak] { display: none !important; }</style>
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('utteranceForm', () => {
+      const init = JSON.parse(document.getElementById('uf-init').textContent);
+      return {
+        situationId: init.situationId,
+
+        saText: init.saText,
+        saId:   init.saId,
+        saOpen: false,
+        saResults: [],
+        saTimer: null,
+
+        snText: init.snText,
+        snId:   init.snId,
+        snOpen: false,
+        snResults: [],
+        snTimer: null,
+
+        onSituationChange(e) {
+          this.situationId = e.target.value;
+          this.snText = ''; this.snId = ''; this.snResults = []; this.snOpen = false;
+        },
+
+        onSaInput() {
+          this.saId = '';
+          clearTimeout(this.saTimer);
+          const q = this.saText.trim();
+          if (!q) { this.saResults = []; this.saOpen = false; return; }
+          this.saTimer = setTimeout(async () => {
+            const r = await fetch(`{% url 'core:speech_act_search' %}?q=${encodeURIComponent(q)}`);
+            this.saResults = await r.json();
+            this.saOpen = true;
+          }, 200);
+        },
+        pickSa(item) { this.saText = item.label; this.saId = String(item.id); this.saOpen = false; },
+        onSaBlur() { setTimeout(() => { this.saOpen = false; }, 150); },
+        get saExactMatch() {
+          return this.saResults.some(r => r.label.toLowerCase() === this.saText.trim().toLowerCase());
+        },
+
+        onSnInput() {
+          this.snId = '';
+          clearTimeout(this.snTimer);
+          const q = this.snText.trim();
+          if (!q) { this.snResults = []; this.snOpen = false; return; }
+          this.snTimer = setTimeout(async () => {
+            const params = new URLSearchParams({ q });
+            if (this.situationId) params.set('situation', this.situationId);
+            const r = await fetch(`{% url 'core:sentence_search' %}?${params}`);
+            this.snResults = await r.json();
+            this.snOpen = true;
+          }, 200);
+        },
+        pickSn(item) { this.snText = item.label; this.snId = String(item.id); this.snOpen = false; },
+        onSnBlur() { setTimeout(() => { this.snOpen = false; }, 150); },
+        get snExactMatch() {
+          return this.snResults.some(r => r.label.toLowerCase() === this.snText.trim().toLowerCase());
+        },
+      };
+    });
+  });
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
 {% endblock %}

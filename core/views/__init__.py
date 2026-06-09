@@ -15,7 +15,7 @@ from .building_block import (
     building_block_practice,
     building_block_update,
 )
-from .sentence import sentence_create, sentence_delete, sentence_detail, sentence_list, sentence_update
+from .sentence import sentence_create, sentence_delete, sentence_detail, sentence_list, sentence_search, sentence_update
 from .situation import (
     situation_create,
     situation_delete,
@@ -28,6 +28,7 @@ from .speech_act import (
     speech_act_delete,
     speech_act_detail,
     speech_act_list,
+    speech_act_search,
     speech_act_update,
 )
 from .situational_utterance import (

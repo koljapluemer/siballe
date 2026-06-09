@@ -1,6 +1,7 @@
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from core.models import Language, Sentence
+from core.models import Language, Sentence, Situation
 
 
 def _validate(post):
@@ -62,3 +63,20 @@ def sentence_delete(request, pk):
         obj.delete()
         return redirect('core:sentence_list')
     return render(request, 'core/sentence/confirm_delete.html', {'obj': obj})
+
+
+def sentence_search(request):
+    q = request.GET.get('q', '').strip()
+    situation_id = request.GET.get('situation', '').strip()
+    qs = Sentence.objects.all()
+    if situation_id:
+        try:
+            situation = Situation.objects.get(pk=situation_id)
+            if situation.language_id:
+                qs = qs.filter(language_id=situation.language_id)
+        except Situation.DoesNotExist:
+            pass
+    if q:
+        qs = qs.filter(content__icontains=q)
+    results = [{'id': s.pk, 'label': s.content} for s in qs[:10]]
+    return JsonResponse(results, safe=False)

@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from core.models import SpeechAct
@@ -50,3 +51,12 @@ def speech_act_delete(request, pk):
         obj.delete()
         return redirect('core:speech_act_list')
     return render(request, 'core/speech_act/confirm_delete.html', {'obj': obj})
+
+
+def speech_act_search(request):
+    q = request.GET.get('q', '').strip()
+    qs = SpeechAct.objects.all()
+    if q:
+        qs = qs.filter(description__icontains=q)
+    results = [{'id': sa.pk, 'label': sa.description} for sa in qs[:10]]
+    return JsonResponse(results, safe=False)
