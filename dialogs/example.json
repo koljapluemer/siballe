@@ -8,24 +8,36 @@
     {
       "id": "A",
       "speaker": "other",
-      "speech_act": "Greet the learner informally"
+      "speech_act": "Greet the learner informally",
+      "lines": [
+        { "content": "Guten Morgen!", "context": "" },
+        { "content": "Hallo, guten Morgen!", "context": "more casual" }
+      ]
     },
     {
       "id": "B",
       "speaker": "learner",
-      "speech_act": "Return the greeting"
+      "speech_act": "Return the greeting",
+      "lines": [
+        { "content": "Guten Morgen!", "context": "" }
+      ]
     },
     {
       "id": "C1",
       "speaker": "other",
       "speech_act": "Ask how the learner is doing",
-      "after": "B"
+      "after": "B",
+      "lines": [
+        { "content": "Wie geht's?", "context": "informal" },
+        { "content": "Wie geht es Ihnen?", "context": "formal" }
+      ]
     },
     {
       "id": "C2",
       "speaker": "other",
       "speech_act": "Invite the learner for coffee",
-      "after": "B"
+      "after": "B",
+      "text": "Wollen wir einen Kaffee holen?"
     }
   ]
 }

@@ -1,0 +1,232 @@
+{
+  "situation": "At a market in Hà Nội",
+  "language": "vie",
+  "name": "Buying fruit",
+  "learner_role": "customer",
+  "other_role": "market vendor",
+  "utterances": [
+    {
+      "id": "A",
+      "speaker": "other",
+      "speech_act": "Attract someone’s attention",
+      "lines": [
+        {
+          "content": "Em ơi, mua xoài không?",
+          "context": "informal, friendly"
+        },
+        {
+          "content": "Xoài ngon đây em ơi.",
+          "context": "market call"
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "speaker": "learner",
+      "speech_act": "Request price information",
+      "lines": [
+        {
+          "content": "Xoài này bao nhiêu một cân ạ?",
+          "context": "polite"
+        },
+        {
+          "content": "Chị ơi, xoài bao nhiêu một cân?",
+          "context": "slightly more casual"
+        }
+      ]
+    },
+    {
+      "id": "C",
+      "speaker": "other",
+      "speech_act": "Provide price information",
+      "lines": [
+        {
+          "content": "Sáu mươi nghìn một cân em nhé.",
+          "context": "friendly"
+        },
+        {
+          "content": "Loại này sáu mươi nghìn một cân.",
+          "context": "direct"
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "speaker": "learner",
+      "speech_act": "Request a discount",
+      "lines": [
+        {
+          "content": "Chị bớt cho em năm mươi nghìn được không?",
+          "context": "polite bargaining"
+        },
+        {
+          "content": "Năm mươi nghìn được không chị?",
+          "context": "shorter"
+        }
+      ]
+    },
+    {
+      "id": "E",
+      "speaker": "other",
+      "speech_act": "Reject an offer",
+      "lines": [
+        {
+          "content": "Năm mươi thì chị không bán được đâu em.",
+          "context": "firm but friendly"
+        },
+        {
+          "content": "Không được em ạ, giá đó thấp quá.",
+          "context": "more direct"
+        }
+      ]
+    },
+    {
+      "id": "F",
+      "speaker": "other",
+      "speech_act": "Make a conditional offer",
+      "lines": [
+        {
+          "content": "Lấy hai cân thì chị tính năm lăm.",
+          "context": "discount for buying more"
+        },
+        {
+          "content": "Hai cân thì năm lăm nghìn một cân nhé.",
+          "context": "shorter"
+        }
+      ]
+    },
+    {
+      "id": "G1",
+      "speaker": "learner",
+      "speech_act": "Accept an offer",
+      "after": "F",
+      "lines": [
+        {
+          "content": "Vâng, chị cân cho em hai cân nhé.",
+          "context": "accepting the discount"
+        },
+        {
+          "content": "Được ạ, em lấy hai cân.",
+          "context": "shorter"
+        }
+      ]
+    },
+    {
+      "id": "G2",
+      "speaker": "learner",
+      "speech_act": "Make a purchase request",
+      "after": "F",
+      "lines": [
+        {
+          "content": "Thôi, em lấy một cân thôi ạ.",
+          "context": "choosing to buy less"
+        },
+        {
+          "content": "Vậy chị cân cho em một cân thôi.",
+          "context": "slightly more direct"
+        }
+      ]
+    },
+    {
+      "id": "H",
+      "speaker": "other",
+      "speech_act": "Offer assistance",
+      "after": ["G1", "G2"],
+      "lines": [
+        {
+          "content": "Rồi. Em có cần túi không?",
+          "context": "ordinary service question"
+        },
+        {
+          "content": "Có lấy túi không em?",
+          "context": "more casual"
+        }
+      ]
+    },
+    {
+      "id": "I",
+      "speaker": "learner",
+      "speech_act": "Accept assistance",
+      "lines": [
+        {
+          "content": "Có ạ.",
+          "context": "polite"
+        },
+        {
+          "content": "Có chị.",
+          "context": "casual"
+        }
+      ]
+    },
+    {
+      "id": "J1",
+      "speaker": "other",
+      "speech_act": "Provide payment information",
+      "after": "I",
+      "lines": [
+        {
+          "content": "Hai cân hết một trăm mười nghìn nhé.",
+          "context": "after buying two kilograms"
+        }
+      ]
+    },
+    {
+      "id": "J2",
+      "speaker": "other",
+      "speech_act": "Provide payment information",
+      "after": "I",
+      "lines": [
+        {
+          "content": "Một cân hết sáu mươi nghìn nhé.",
+          "context": "after buying one kilogram"
+        }
+      ]
+    },
+    {
+      "id": "K",
+      "speaker": "learner",
+      "speech_act": "Make a payment",
+      "after": ["J1", "J2"],
+      "lines": [
+        {
+          "content": "Đây ạ.",
+          "context": "handing over money"
+        },
+        {
+          "content": "Em gửi chị tiền ạ.",
+          "context": "polite"
+        }
+      ]
+    },
+    {
+      "id": "L",
+      "speaker": "other",
+      "speech_act": "Thank someone",
+      "lines": [
+        {
+          "content": "Cảm ơn em nhé.",
+          "context": "friendly"
+        },
+        {
+          "content": "Cảm ơn em.",
+          "context": "neutral"
+        }
+      ]
+    },
+    {
+      "id": "M",
+      "speaker": "learner",
+      "speech_act": "Thank someone",
+      "lines": [
+        {
+          "content": "Em cảm ơn chị.",
+          "context": "polite"
+        },
+        {
+          "content": "Cảm ơn chị ạ.",
+          "context": "polite"
+        }
+      ]
+    }
+  ]
+}
