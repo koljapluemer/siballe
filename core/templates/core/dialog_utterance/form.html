@@ -41,18 +41,25 @@
 
         <div class="form-control mb-4">
           <label class="label"><span class="label-text font-medium">Speaker</span></label>
-          {% if dialog.speakers %}
+          {% if dialog.learner_role or dialog.other_role %}
           <div class="flex flex-wrap gap-3 mt-1">
-            {% for speaker in dialog.speakers %}
+            {% if dialog.learner_role %}
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="radio" name="speaker" value="{{ speaker }}" class="radio radio-primary"
-                {% if values.speaker == speaker %}checked{% endif %}>
-              <span class="text-sm">{{ speaker }}</span>
+              <input type="radio" name="speaker" value="{{ dialog.learner_role }}" class="radio radio-primary"
+                {% if values.speaker == dialog.learner_role %}checked{% endif %}>
+              <span class="text-sm">{{ dialog.learner_role }}</span>
             </label>
-            {% endfor %}
+            {% endif %}
+            {% if dialog.other_role %}
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="speaker" value="{{ dialog.other_role }}" class="radio radio-primary"
+                {% if values.speaker == dialog.other_role %}checked{% endif %}>
+              <span class="text-sm">{{ dialog.other_role }}</span>
+            </label>
+            {% endif %}
           </div>
           {% else %}
-          <p class="text-sm text-warning mt-1">This dialog has no speakers defined. <a href="{% url 'core:dialog_update' dialog.pk %}" class="link">Add speakers first.</a></p>
+          <p class="text-sm text-warning mt-1">This dialog has no roles defined. <a href="{% url 'core:dialog_update' dialog.pk %}" class="link">Add roles first.</a></p>
           {% endif %}
           {% if errors.speaker %}<p class="text-error text-sm mt-1">{{ errors.speaker }}</p>{% endif %}
         </div>
@@ -89,16 +96,23 @@
         <div class="form-control mb-6">
           <label class="label">
             <span class="label-text font-medium">Follows after</span>
-            <span class="label-text-alt text-base-content/40">leave blank = start of dialog</span>
+            <span class="label-text-alt text-base-content/40">none checked = start of dialog</span>
           </label>
-          <select name="previous_utterance" class="select select-bordered">
-            <option value="">— start —</option>
+          {% if dialog_utterances %}
+          <div class="flex flex-col gap-2 mt-1">
             {% for u in dialog_utterances %}
             {% if not obj or u.pk != obj.pk %}
-            <option value="{{ u.pk }}"{% if selected_previous_utterance == u.pk|stringformat:"s" %} selected{% endif %}>{{ u.speaker }}: {{ u.speech_act }}</option>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="previous_utterances" value="{{ u.pk }}" class="checkbox checkbox-primary checkbox-sm"
+                {% if u.pk|stringformat:"s" in selected_previous_utterances %}checked{% endif %}>
+              <span class="text-sm"><span class="badge badge-outline badge-sm">{{ u.speaker }}</span> {{ u.speech_act }}</span>
+            </label>
             {% endif %}
             {% endfor %}
-          </select>
+          </div>
+          {% else %}
+          <p class="text-sm text-base-content/40 mt-1">No other utterances yet.</p>
+          {% endif %}
         </div>
 
         <div class="flex gap-2">

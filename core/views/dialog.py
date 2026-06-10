@@ -11,13 +11,10 @@ def _validate(post):
         errors['name'] = 'Required.'
     values = {
         'name': post.get('name', '').strip(),
-        'speakers_raw': post.get('speakers_raw', '').strip(),
+        'learner_role': post.get('learner_role', '').strip(),
+        'other_role': post.get('other_role', '').strip(),
     }
     return values, errors
-
-
-def _parse_speakers(raw):
-    return [line.strip() for line in raw.splitlines() if line.strip()]
 
 
 def _md(text):
@@ -27,17 +24,14 @@ def _md(text):
 def _build_mermaid(dialog):
     utterances = list(
         dialog.utterances
-        .select_related('speech_act', 'previous_utterance')
-        .prefetch_related('lines__sentence')
+        .select_related('speech_act')
+        .prefetch_related('lines__sentence', 'previous_utterances')
         .order_by('pk')
     )
     if not utterances:
         return ''
     utt_ids = {u.pk for u in utterances}
     lines = ['flowchart TD']
-    end_counter = 0
-    roots = [u for u in utterances if u.previous_utterance_id is None]
-    non_roots = [u for u in utterances if u.previous_utterance_id is not None]
 
     for u in utterances:
         start_marker = ' ◀' if dialog.start_utterance_id == u.pk else ''
@@ -47,15 +41,10 @@ def _build_mermaid(dialog):
         label = '\n'.join(parts)
         lines.append(f'  U{u.pk}["`{label}`"]')
 
-    for u in non_roots:
-        if u.previous_utterance_id in utt_ids:
-            lines.append(f'  U{u.previous_utterance_id} --> U{u.pk}')
-
-    if not non_roots and roots:
-        for u in roots:
-            end_counter += 1
-            lines.append(f'  END{end_counter}(( ))')
-            lines.append(f'  U{u.pk} --> END{end_counter}')
+    for u in utterances:
+        for prev in u.previous_utterances.all():
+            if prev.pk in utt_ids:
+                lines.append(f'  U{prev.pk} --> U{u.pk}')
 
     return '\n'.join(lines)
 
@@ -73,7 +62,8 @@ def dialog_create(request):
             obj = Dialog.objects.create(
                 situation=situation,
                 name=values['name'],
-                speakers=_parse_speakers(values['speakers_raw']),
+                learner_role=values['learner_role'],
+                other_role=values['other_role'],
             )
             return redirect('core:dialog_detail', pk=obj.pk)
         return render(request, 'core/dialog/form.html', {
@@ -92,7 +82,7 @@ def dialog_detail(request, pk):
     obj = get_object_or_404(
         Dialog.objects.select_related('situation').prefetch_related(
             'utterances__speech_act',
-            'utterances__previous_utterance',
+            'utterances__previous_utterances',
             'utterances__lines__sentence',
         ),
         pk=pk,
@@ -112,7 +102,8 @@ def dialog_update(request, pk):
             situation = get_object_or_404(Situation, pk=request.POST['situation'])
             obj.situation = situation
             obj.name = values['name']
-            obj.speakers = _parse_speakers(values['speakers_raw'])
+            obj.learner_role = values['learner_role']
+            obj.other_role = values['other_role']
             start_utterance_id = request.POST.get('start_utterance') or None
             obj.start_utterance_id = start_utterance_id
             obj.save()
@@ -128,7 +119,8 @@ def dialog_update(request, pk):
         })
     values = {
         'name': obj.name,
-        'speakers_raw': '\n'.join(obj.speakers),
+        'learner_role': obj.learner_role,
+        'other_role': obj.other_role,
     }
     return render(request, 'core/dialog/form.html', {
         'values': values,

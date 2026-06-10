@@ -34,13 +34,19 @@
         </div>
 
         <div class="form-control mb-4">
-          <label class="label">
-            <span class="label-text font-medium">Speakers</span>
-            <span class="label-text-alt text-base-content/40">one per line</span>
-          </label>
-          <textarea name="speakers_raw" rows="4"
-            class="textarea textarea-bordered"
-            placeholder="Alice&#10;Bob">{{ values.speakers_raw|default:'' }}</textarea>
+          <label class="label"><span class="label-text font-medium">Learner role <span class="text-base-content/40 font-normal">(optional)</span></span></label>
+          <input type="text" name="learner_role"
+            class="input input-bordered"
+            value="{{ values.learner_role|default:'' }}"
+            placeholder="e.g. Customer">
+        </div>
+
+        <div class="form-control mb-4">
+          <label class="label"><span class="label-text font-medium">Other role <span class="text-base-content/40 font-normal">(optional)</span></span></label>
+          <input type="text" name="other_role"
+            class="input input-bordered"
+            value="{{ values.other_role|default:'' }}"
+            placeholder="e.g. Shopkeeper">
         </div>
 
         {% if obj and utterances %}

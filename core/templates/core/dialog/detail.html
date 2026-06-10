@@ -17,13 +17,11 @@
           <a href="{% url 'core:situation_detail' obj.situation.pk %}" class="link link-hover">{{ obj.situation }}</a>
         </div>
         <div>
-          <p class="text-sm text-base-content/60 mb-2">Speakers</p>
+          <p class="text-sm text-base-content/60 mb-2">Roles</p>
           <div class="flex flex-wrap gap-1">
-            {% for speaker in obj.speakers %}
-            <span class="badge badge-outline">{{ speaker }}</span>
-            {% empty %}
-            <span class="text-sm text-base-content/40">None</span>
-            {% endfor %}
+            {% if obj.learner_role %}<span class="badge badge-outline">Learner: {{ obj.learner_role }}</span>{% endif %}
+            {% if obj.other_role %}<span class="badge badge-outline">Other: {{ obj.other_role }}</span>{% endif %}
+            {% if not obj.learner_role and not obj.other_role %}<span class="text-sm text-base-content/40">None</span>{% endif %}
           </div>
         </div>
       </div>
@@ -56,11 +54,13 @@
           {% if obj.start_utterance_id == u.pk %}<span class="badge badge-primary badge-sm">start</span>{% endif %}
           <span class="badge badge-outline badge-sm">{{ u.speaker }}</span>
           <span class="font-medium">{{ u.speech_act }}</span>
-          {% if u.previous_utterance %}
-          <span class="text-xs text-base-content/40">← {{ u.previous_utterance.speech_act }}</span>
+          {% with prevs=u.previous_utterances.all %}
+          {% if prevs %}
+          <span class="text-xs text-base-content/40">← {% for p in prevs %}{{ p.speech_act }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
           {% else %}
           <span class="text-xs text-base-content/40">← start</span>
           {% endif %}
+          {% endwith %}
         </div>
         <div class="flex gap-1 shrink-0">
           <a href="{% url 'core:dialog_utterance_update' u.pk %}" class="btn btn-ghost btn-xs">Edit</a>
