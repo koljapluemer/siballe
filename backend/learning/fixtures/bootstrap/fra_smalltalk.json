@@ -1,0 +1,157 @@
+{
+  "nodes": [
+    {
+      "key": "fra_sentence_bonjour",
+      "kind": "SENTENCE",
+      "language": "fra",
+      "content": "Bonjour, comment ça va ?",
+      "state": "TRUSTED",
+      "credit": "siballe bootstrap",
+      "translations": [{"key": "eng_sentence_hello_how_are_you"}],
+      "parts": [
+        {"key": "fra_vocab_bonjour"},
+        {"key": "fra_vocab_comment_ca_va"}
+      ]
+    },
+    {
+      "key": "eng_sentence_hello_how_are_you",
+      "kind": "SENTENCE",
+      "language": "eng",
+      "content": "Hello, how are you?",
+      "state": "TRUSTED"
+    },
+    {
+      "key": "fra_vocab_bonjour",
+      "kind": "VOCAB",
+      "language": "fra",
+      "content": "bonjour",
+      "state": "TRUSTED",
+      "translations": [{"key": "eng_vocab_hello", "note": "informal greeting"}],
+      "examples": [{"key": "fra_sentence_bonjour"}]
+    },
+    {
+      "key": "eng_vocab_hello",
+      "kind": "VOCAB",
+      "language": "eng",
+      "content": "hello",
+      "state": "TRUSTED"
+    },
+    {
+      "key": "fra_vocab_comment_ca_va",
+      "kind": "VOCAB",
+      "language": "fra",
+      "content": "comment ça va",
+      "state": "TRUSTED",
+      "translations": [{"key": "eng_vocab_how_are_you"}],
+      "examples": [{"key": "fra_sentence_bonjour"}]
+    },
+    {
+      "key": "eng_vocab_how_are_you",
+      "kind": "VOCAB",
+      "language": "eng",
+      "content": "how are you",
+      "state": "TRUSTED"
+    },
+    {
+      "key": "fra_sentence_au_revoir",
+      "kind": "SENTENCE",
+      "language": "fra",
+      "content": "Au revoir, à bientôt !",
+      "state": "TRUSTED",
+      "credit": "siballe bootstrap",
+      "translations": [{"key": "eng_sentence_goodbye_see_you_soon"}],
+      "parts": [
+        {"key": "fra_vocab_au_revoir"},
+        {"key": "fra_vocab_a_bientot"}
+      ]
+    },
+    {
+      "key": "eng_sentence_goodbye_see_you_soon",
+      "kind": "SENTENCE",
+      "language": "eng",
+      "content": "Goodbye, see you soon!",
+      "state": "TRUSTED"
+    },
+    {
+      "key": "fra_vocab_au_revoir",
+      "kind": "VOCAB",
+      "language": "fra",
+      "content": "au revoir",
+      "state": "TRUSTED",
+      "translations": [{"key": "eng_vocab_goodbye"}],
+      "examples": [{"key": "fra_sentence_au_revoir"}]
+    },
+    {
+      "key": "eng_vocab_goodbye",
+      "kind": "VOCAB",
+      "language": "eng",
+      "content": "goodbye",
+      "state": "TRUSTED"
+    },
+    {
+      "key": "fra_vocab_a_bientot",
+      "kind": "VOCAB",
+      "language": "fra",
+      "content": "à bientôt",
+      "state": "TRUSTED",
+      "translations": [{"key": "eng_vocab_see_you_soon"}],
+      "examples": [{"key": "fra_sentence_au_revoir"}]
+    },
+    {
+      "key": "eng_vocab_see_you_soon",
+      "kind": "VOCAB",
+      "language": "eng",
+      "content": "see you soon",
+      "state": "TRUSTED"
+    },
+    {
+      "key": "fra_sentence_merci",
+      "kind": "SENTENCE",
+      "language": "fra",
+      "content": "Merci beaucoup !",
+      "state": "TRUSTED",
+      "credit": "siballe bootstrap",
+      "translations": [{"key": "eng_sentence_thank_you_very_much"}],
+      "parts": [{"key": "fra_vocab_merci"}]
+    },
+    {
+      "key": "eng_sentence_thank_you_very_much",
+      "kind": "SENTENCE",
+      "language": "eng",
+      "content": "Thank you very much!",
+      "state": "TRUSTED"
+    },
+    {
+      "key": "fra_vocab_merci",
+      "kind": "VOCAB",
+      "language": "fra",
+      "content": "merci",
+      "state": "TRUSTED",
+      "translations": [{"key": "eng_vocab_thank_you"}],
+      "examples": [{"key": "fra_sentence_merci"}]
+    },
+    {
+      "key": "eng_vocab_thank_you",
+      "kind": "VOCAB",
+      "language": "eng",
+      "content": "thank you",
+      "state": "TRUSTED"
+    }
+  ],
+  "situations": [
+    {
+      "language": "fra",
+      "description": "Smalltalk in French",
+      "relations": [
+        {"node": "fra_sentence_bonjour", "relevance": 5},
+        {"node": "fra_sentence_au_revoir", "relevance": 5},
+        {"node": "fra_sentence_merci", "relevance": 4},
+        {"node": "fra_vocab_bonjour", "relevance": 3},
+        {"node": "fra_vocab_comment_ca_va", "relevance": 3},
+        {"node": "fra_vocab_au_revoir", "relevance": 3},
+        {"node": "fra_vocab_a_bientot", "relevance": 3},
+        {"node": "fra_vocab_merci", "relevance": 3}
+      ]
+    }
+  ]
+}
