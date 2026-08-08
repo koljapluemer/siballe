@@ -1,8 +1,21 @@
 set dotenv-load
 
-# Run the backend dev server (migrating first).
+# Auto-detect any Chrome/Chromium-family browser on this machine so flutter's
+# `-d chrome` device works without hand-editing a path per dev machine.
+# Respects a manually-set CHROME_EXECUTABLE (e.g. via .env) if present.
+_detected_chrome := `command -v google-chrome google-chrome-stable chromium chromium-browser microsoft-edge microsoft-edge-stable 2>/dev/null | head -n1`
+export CHROME_EXECUTABLE := env("CHROME_EXECUTABLE", _detected_chrome)
+
+# Run the backend (migrating first) and the Flutter frontend together.
+# Ctrl+C stops the frontend and kills the backgrounded backend server.
 dev:
-    cd backend && uv run manage.py migrate && uv run manage.py runserver
+    #!/usr/bin/env bash
+    set -euo pipefail
+    (cd backend && uv run manage.py migrate)
+    (cd backend && uv run manage.py runserver) &
+    backend_pid=$!
+    trap "kill $backend_pid 2>/dev/null" EXIT
+    cd frontend && flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000/api
 
 migrate:
     cd backend && uv run manage.py migrate
