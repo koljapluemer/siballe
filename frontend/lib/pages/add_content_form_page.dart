@@ -62,7 +62,10 @@ class _AddContentFormPageState extends State<AddContentFormPage> {
   Future<List<Language>> _languageSuggestions(String query) async {
     if (query.trim().isEmpty) return [];
     final lower = query.toLowerCase();
-    return _languages.where((l) => l.name.toLowerCase().contains(lower)).take(8).toList();
+    return _languages
+        .where((l) => l.name.toLowerCase().contains(lower))
+        .take(8)
+        .toList();
   }
 
   Future<List<String>> _situationSuggestions(String query) async {
@@ -70,7 +73,9 @@ class _AddContentFormPageState extends State<AddContentFormPage> {
     if (language == null) return [];
     if (_situationsLoadedForCode != language.code) {
       _situationsLoadedForCode = language.code;
-      final situations = await widget.situationsRepository.listForLanguage(language.code);
+      final situations = await widget.situationsRepository.listForLanguage(
+        language.code,
+      );
       _situationsForLanguage = situations.map((s) => s.description).toList();
     }
     final lower = query.trim().toLowerCase();
@@ -83,7 +88,11 @@ class _AddContentFormPageState extends State<AddContentFormPage> {
   Future<List<String>> _contentSuggestions(String query) {
     final language = _selectedLanguage;
     if (language == null) return Future.value([]);
-    return widget.nodeRepository.search(kind: widget.kind, language: language.code, query: query);
+    return widget.nodeRepository.search(
+      kind: widget.kind,
+      language: language.code,
+      query: query,
+    );
   }
 
   Language? _resolveLanguage() {
@@ -103,7 +112,9 @@ class _AddContentFormPageState extends State<AddContentFormPage> {
     final content = _contentController.text.trim();
     final translations = _translations.nonEmptyTranslations;
     if (content.isEmpty && translations.isEmpty) {
-      setState(() => _error = 'Add the word/sentence or at least one translation.');
+      setState(
+        () => _error = 'Add the word/sentence or at least one translation.',
+      );
       return;
     }
 
@@ -133,63 +144,72 @@ class _AddContentFormPageState extends State<AddContentFormPage> {
     final isSentence = widget.kind == 'SENTENCE';
     return Scaffold(
       appBar: AppBar(title: Text(isSentence ? 'Add Sentence' : 'Add Vocab')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SmartField<Language>(
-              controller: _languageController,
-              labelText: 'Language',
-              suggestionsBuilder: _languageSuggestions,
-              displayStringForOption: (option) => option.name,
-              onSelected: (option) => setState(() {
-                _selectedLanguage = option;
-                _situationsLoadedForCode = null;
-              }),
-            ),
-            const SizedBox(height: 16),
-            SmartField<String>(
-              controller: _situationController,
-              labelText: 'Situation',
-              hintText: _selectedLanguage == null ? null : 'General ${_selectedLanguage!.name}',
-              suggestionsBuilder: _situationSuggestions,
-              displayStringForOption: (option) => option,
-            ),
-            const SizedBox(height: 16),
-            SmartField<String>(
-              controller: _contentController,
-              labelText: isSentence ? 'Sentence' : 'Word',
-              maxLines: isSentence ? 3 : 1,
-              suggestionsBuilder: _contentSuggestions,
-              displayStringForOption: (option) => option,
-            ),
-            const SizedBox(height: 16),
-            TranslationRowsField(
-              controller: _translations,
-              kind: widget.kind,
-              nodeRepository: widget.nodeRepository,
-            ),
-            const SizedBox(height: 24),
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  _error!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SmartField<Language>(
+                  controller: _languageController,
+                  labelText: 'Language',
+                  suggestionsBuilder: _languageSuggestions,
+                  displayStringForOption: (option) => option.name,
+                  onSelected: (option) => setState(() {
+                    _selectedLanguage = option;
+                    _situationsLoadedForCode = null;
+                  }),
                 ),
-              ),
-            ElevatedButton(
-              onPressed: _submitting ? null : _submit,
-              child: _submitting
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Save'),
+                const SizedBox(height: 16),
+                SmartField<String>(
+                  controller: _situationController,
+                  labelText: 'Situation',
+                  hintText: _selectedLanguage == null
+                      ? null
+                      : 'General ${_selectedLanguage!.name}',
+                  suggestionsBuilder: _situationSuggestions,
+                  displayStringForOption: (option) => option,
+                ),
+                const SizedBox(height: 16),
+                SmartField<String>(
+                  controller: _contentController,
+                  labelText: isSentence ? 'Sentence' : 'Word',
+                  maxLines: isSentence ? 3 : 1,
+                  suggestionsBuilder: _contentSuggestions,
+                  displayStringForOption: (option) => option,
+                ),
+                const SizedBox(height: 16),
+                TranslationRowsField(
+                  controller: _translations,
+                  kind: widget.kind,
+                  nodeRepository: widget.nodeRepository,
+                ),
+                const SizedBox(height: 24),
+                if (_error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      _error!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ),
+                ElevatedButton(
+                  onPressed: _submitting ? null : _submit,
+                  child: _submitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Save'),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

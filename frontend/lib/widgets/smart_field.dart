@@ -39,14 +39,6 @@ class _SmartFieldState<T> extends State<SmartField<T>> {
   final _focusNode = FocusNode();
 
   @override
-  void initState() {
-    super.initState();
-    _focusNode.addListener(() {
-      if (!_focusNode.hasFocus) setState(() => _suggestions = []);
-    });
-  }
-
-  @override
   void dispose() {
     _debounce?.cancel();
     _focusNode.dispose();
@@ -73,38 +65,51 @@ class _SmartFieldState<T> extends State<SmartField<T>> {
     _focusNode.unfocus();
   }
 
+  void _dismiss() {
+    if (_suggestions.isEmpty) return;
+    setState(() => _suggestions = []);
+    _focusNode.unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: widget.controller,
-          focusNode: _focusNode,
-          maxLines: widget.maxLines,
-          decoration: InputDecoration(
-            labelText: widget.labelText,
-            hintText: widget.hintText,
-            border: const OutlineInputBorder(),
-          ),
-          onChanged: _onTextChanged,
-        ),
-        if (_suggestions.isNotEmpty)
-          Card(
-            margin: const EdgeInsets.only(top: 2),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final option in _suggestions)
-                  ListTile(
-                    dense: true,
-                    title: Text(widget.displayStringForOption(option)),
-                    onTap: () => _select(option),
-                  ),
-              ],
+    // Suggestions are dismissed via TapRegion rather than a focus-loss
+    // listener: tapping a suggestion drops the field's focus before its
+    // onTap fires, so clearing suggestions on focus loss would unmount the
+    // tile mid-tap and swallow the selection.
+    return TapRegion(
+      onTapOutside: (_) => _dismiss(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: widget.controller,
+            focusNode: _focusNode,
+            maxLines: widget.maxLines,
+            decoration: InputDecoration(
+              labelText: widget.labelText,
+              hintText: widget.hintText,
+              border: const OutlineInputBorder(),
             ),
+            onChanged: _onTextChanged,
           ),
-      ],
+          if (_suggestions.isNotEmpty)
+            Card(
+              margin: const EdgeInsets.only(top: 2),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final option in _suggestions)
+                    ListTile(
+                      dense: true,
+                      title: Text(widget.displayStringForOption(option)),
+                      onTap: () => _select(option),
+                    ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

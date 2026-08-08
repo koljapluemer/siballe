@@ -10,22 +10,15 @@ class FsrsButtonRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _button(context, 'Wrong', Colors.red),
-        _button(context, 'Hard', Colors.orange),
-        _button(context, 'Correct', Colors.green),
-        _button(context, 'Easy', Colors.blue),
+        _button('Wrong'),
+        _button('Hard'),
+        _button('Correct'),
+        _button('Easy'),
       ],
     );
   }
 
-  Widget _button(BuildContext context, String label, Color color) {
-    return ElevatedButton(
-      onPressed: onAnswer,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-      ),
-      child: Text(label),
-    );
+  Widget _button(String label) {
+    return ElevatedButton(onPressed: onAnswer, child: Text(label));
   }
 }

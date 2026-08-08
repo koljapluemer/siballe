@@ -41,7 +41,9 @@ class _ProfilePageState extends State<ProfilePage> {
       await widget.apiKeyStore.write(value);
     }
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saved.')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Saved.')));
   }
 
   @override
@@ -50,22 +52,30 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(title: const Text('Profile')),
       body: !_loaded
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: _controller,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'OpenAI API Key',
-                      border: OutlineInputBorder(),
-                    ),
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextField(
+                        controller: _controller,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          labelText: 'OpenAI API Key',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _save,
+                        child: const Text('Save'),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(onPressed: _save, child: const Text('Save')),
-                ],
+                ),
               ),
             ),
     );
