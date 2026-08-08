@@ -8,7 +8,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('bottom nav shows Learn/Add/Situations and switches tabs', (
+  testWidgets('bottom nav shows Learn/Add/Situations/Profile and switches tabs', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const App());
@@ -17,9 +17,11 @@ void main() {
     expect(find.text('Learn'), findsWidgets);
     expect(find.text('Add'), findsWidgets);
     expect(find.text('Situations'), findsWidgets);
+    expect(find.text('Profile'), findsWidgets);
 
     await tester.tap(find.text('Add'));
     await tester.pump();
-    expect(find.text('Coming soon.'), findsOneWidget);
+    expect(find.text('Add Sentence'), findsOneWidget);
+    expect(find.text('Add Vocab'), findsOneWidget);
   });
 }

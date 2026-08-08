@@ -23,3 +23,12 @@ class SituationListViewTests(APITestCase):
         fra_group = next(g for g in data if g["language"] == "fra")
         descriptions = {s["description"] for s in fra_group["situations"]}
         self.assertEqual(descriptions, {"Smalltalk in French", "Buying bread"})
+
+    def test_filter_by_language(self):
+        Situation.objects.create(language="fra", description="Smalltalk in French")
+        Situation.objects.create(language="deu", description="Ordering coffee")
+
+        response = self.client.get("/api/situations/", {"language": "deu"})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual([group["language"] for group in data], ["deu"])

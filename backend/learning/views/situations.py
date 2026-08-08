@@ -15,6 +15,9 @@ class SituationListView(APIView):
 
     def get(self, request):
         situations = Situation.objects.order_by("language", "description")
+        language = request.query_params.get("language")
+        if language:
+            situations = situations.filter(language=language)
         grouped: dict[str, list[Situation]] = defaultdict(list)
         for situation in situations:
             grouped[situation.language].append(situation)

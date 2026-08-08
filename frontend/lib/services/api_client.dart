@@ -28,7 +28,25 @@ class ApiClient {
     } catch (e) {
       throw ApiException('Could not reach the server: $e');
     }
+    return _decode(response);
+  }
 
+  Future<dynamic> post(String path, Map<String, dynamic> body) async {
+    final uri = Uri.parse('$apiBaseUrl$path');
+    late http.Response response;
+    try {
+      response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+    } catch (e) {
+      throw ApiException('Could not reach the server: $e');
+    }
+    return _decode(response);
+  }
+
+  dynamic _decode(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
     }

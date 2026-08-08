@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'pages/add_page.dart';
 import 'pages/learn_page.dart';
+import 'pages/profile_page.dart';
 import 'pages/situations_page.dart';
 
 class App extends StatelessWidget {
@@ -27,7 +28,7 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
 
-  static const _pages = [LearnPage(), AddPage(), SituationsPage()];
+  static const _pages = [LearnPage(), AddPage(), SituationsPage(), ProfilePage()];
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +41,7 @@ class _AppShellState extends State<AppShell> {
           BottomNavigationBarItem(icon: Icon(Icons.play_arrow), label: 'Learn'),
           BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Add'),
           BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Situations'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );

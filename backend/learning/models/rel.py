@@ -14,6 +14,7 @@ class Rel(models.Model):
     class State(models.TextChoices):
         TRUSTED = "TRUSTED", "Trusted"
         NEEDS_CHECKING = "NEEDS_CHECKING", "Needs checking"
+        AUTO_GENERATED = "AUTO_GENERATED", "Auto-generated"
 
     sender = models.ForeignKey(
         Node, on_delete=models.CASCADE, related_name="outgoing_rels"

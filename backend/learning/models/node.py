@@ -13,6 +13,7 @@ class Node(models.Model):
     class State(models.TextChoices):
         TRUSTED = "TRUSTED", "Trusted"
         NEEDS_CHECKING = "NEEDS_CHECKING", "Needs checking"
+        AUTO_GENERATED = "AUTO_GENERATED", "Auto-generated"
 
     kind = models.CharField(max_length=16, choices=Kind.choices)
     language = models.CharField(max_length=3, validators=[validate_iso639_3])

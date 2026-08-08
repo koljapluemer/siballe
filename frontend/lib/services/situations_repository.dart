@@ -12,4 +12,12 @@ class SituationsRepository {
         .map((g) => LanguageGroup.fromJson(g as Map<String, dynamic>))
         .toList();
   }
+
+  Future<List<Situation>> listForLanguage(String languageCode) async {
+    final data = await _client.get('/situations/', query: {'language': languageCode});
+    final groups = (data as List)
+        .map((g) => LanguageGroup.fromJson(g as Map<String, dynamic>))
+        .toList();
+    return groups.isEmpty ? [] : groups.first.situations;
+  }
 }

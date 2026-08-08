@@ -129,3 +129,9 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
+
+
+# AI generation
+# The OpenAI API key itself is never configured here - it is supplied by the
+# client per-request (stored only on-device) and never persisted server-side.
+OPENAI_MODEL = env("OPENAI_MODEL", default="gpt-4o-mini")
