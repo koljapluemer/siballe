@@ -15,7 +15,7 @@ dev:
     (cd backend && uv run manage.py runserver) &
     backend_pid=$!
     trap "kill $backend_pid 2>/dev/null" EXIT
-    cd frontend && flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000/api
+    cd frontend && flutter run -d chrome --web-port=5000 --dart-define=API_BASE_URL=http://localhost:8000/api
 
 migrate:
     cd backend && uv run manage.py migrate
@@ -32,4 +32,4 @@ test:
 
 # Run the Flutter app against a locally running backend.
 frontend:
-    cd frontend && flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000/api
+    cd frontend && flutter run -d chrome --web-port=5000 --dart-define=API_BASE_URL=http://localhost:8000/api
