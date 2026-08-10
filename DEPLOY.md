@@ -36,8 +36,10 @@ to add HTTPS — nothing before that point needs to be redone, only extended.
 
 ## 1. One-time VPS setup
 
-Do this once, on a fresh Ubuntu 24.04 LTS VPS. Replace `<VPS_IP>` and `<devname>`
-throughout with your actual values.
+Do this once, on a fresh Ubuntu 24.04 LTS VPS. Replace `<VPS_IP>` throughout
+with your actual value. Everything here runs as `root` — see the
+[Appendix](#appendix-creating-a-dedicated-sudo-user-later) at the end for
+switching to a dedicated sudo user once that starts to matter.
 
 ### 1.1 System packages
 
@@ -49,26 +51,19 @@ apt install -y git curl ufw fail2ban unattended-upgrades nginx \
     postgresql postgresql-contrib rsync
 ```
 
-### 1.2 Create your own sudo user
+### 1.2 Confirm SSH access as root
 
-Don't use `root` for day-to-day admin or deploys.
-
-```sh
-adduser <devname>
-usermod -aG sudo <devname>
-```
-
-Copy your local public key into place so you can log in as `<devname>`:
+Confirm you can log in with your key (no password) **before** continuing —
+you're about to disable password auth entirely:
 
 ```sh
-rsync --rsync-path="sudo -u <devname> rsync" -avz ~/.ssh/authorized_keys \
-    <VPS_IP>:/home/<devname>/.ssh/authorized_keys
+ssh root@<VPS_IP>
 ```
 
-(Or paste your `~/.ssh/id_ed25519.pub` into `/home/<devname>/.ssh/authorized_keys`
-by hand.) From your local machine, confirm `ssh <devname>@<VPS_IP>` works and
-logs you in with a key (no password) **before** continuing — you're about to
-disable root login and password auth.
+(Most providers pre-install your local public key for root when you create
+the VPS. If yours didn't, paste your `~/.ssh/id_ed25519.pub` into
+`/root/.ssh/authorized_keys` by hand, or use your provider's console/rescue
+tools.)
 
 Add a convenience alias to your **local** `~/.ssh/config` — the `justfile`'s
 deploy recipes use this host alias:
@@ -76,19 +71,20 @@ deploy recipes use this host alias:
 ```
 Host siballe-vps
     HostName <VPS_IP>
-    User <devname>
+    User root
 ```
 
 ### 1.3 SSH hardening
 
-On the VPS, as `<devname>` with sudo:
+Root login stays enabled (it's the only account for now), but key-only — no
+password auth at all:
 
 ```sh
-sudo tee /etc/ssh/sshd_config.d/99-siballe.conf <<'EOF'
-PermitRootLogin no
+tee /etc/ssh/sshd_config.d/99-siballe.conf <<'EOF'
+PermitRootLogin prohibit-password
 PasswordAuthentication no
 EOF
-sudo systemctl restart ssh
+systemctl restart ssh
 ```
 
 ### 1.4 Firewall
@@ -125,17 +121,15 @@ Choose "Yes" when prompted. This writes
 ### 1.6 App user and directories
 
 ```sh
-sudo adduser --system --group --no-create-home --shell /usr/sbin/nologin siballe
-sudo mkdir -p /opt/siballe/{app,frontend-web,backups}
-sudo chown -R siballe:siballe /opt/siballe
-
-# Let your own (rsync'ing) user write the frontend build without sudo:
-sudo usermod -aG siballe <devname>
-sudo chmod -R g+w /opt/siballe/frontend-web
+adduser --system --group --no-create-home --shell /usr/sbin/nologin siballe
+mkdir -p /opt/siballe/{app,frontend-web,backups}
+chown -R siballe:siballe /opt/siballe
 ```
 
-Log out and back in (or run `newgrp siballe`) for the group change to apply to
-your shell.
+No group-write dance needed here — logged in as `root`, the deploy recipes
+(`git pull`, `rsync`) can write into these directories directly. The
+[Appendix](#appendix-creating-a-dedicated-sudo-user-later) covers granting a
+non-root user the same access.
 
 ### 1.7 Install uv and Python for the app user
 
@@ -496,3 +490,75 @@ structurally — the same-origin, path-routed layout maps directly onto a domain
     sudo systemctl restart gunicorn-siballe
     sudo nginx -t && sudo systemctl reload nginx
     ```
+
+---
+
+## Appendix: creating a dedicated sudo user later
+
+Running everything as `root` is fine to get started. Before this matters in
+earnest — real traffic, other people touching the box — switch day-to-day
+admin and deploys to a dedicated sudo user instead: root logging in over SSH
+is a bigger blast radius than it needs to be (a leaked key is instant root,
+not "instant sudo user who still needs to escalate"), and there's no audit
+trail for who ran what.
+
+### Create the user
+
+On the VPS, as root:
+
+```sh
+adduser <devname>
+usermod -aG sudo <devname>
+```
+
+Copy your local public key into place so you can log in as `<devname>`:
+
+```sh
+rsync --rsync-path="sudo -u <devname> rsync" -avz ~/.ssh/authorized_keys \
+    <VPS_IP>:/home/<devname>/.ssh/authorized_keys
+```
+
+(Or paste your `~/.ssh/id_ed25519.pub` into `/home/<devname>/.ssh/authorized_keys`
+by hand.) From your local machine, confirm `ssh <devname>@<VPS_IP>` works and
+logs you in with a key (no password) **before** continuing — you're about to
+disable root login entirely.
+
+### Lock out root over SSH
+
+This replaces the `PermitRootLogin prohibit-password` set in step 1.3:
+
+```sh
+sudo tee /etc/ssh/sshd_config.d/99-siballe.conf <<'EOF'
+PermitRootLogin no
+PasswordAuthentication no
+EOF
+sudo systemctl restart ssh
+```
+
+### Let the new user deploy without sudo
+
+The deploy recipes (`just deploy`, `sync-frontend-prod`) write directly into
+`/opt/siballe/app` and `/opt/siballe/frontend-web`, both owned by `siballe`.
+Give `<devname>` group access to both — not just `frontend-web`, since
+`deploy-backend` also needs to `git pull` into `app`:
+
+```sh
+sudo usermod -aG siballe <devname>
+sudo chmod -R g+w /opt/siballe/app /opt/siballe/frontend-web
+```
+
+Log out and back in (or run `newgrp siballe`) for the group change to apply
+to your shell.
+
+### Update your local SSH config
+
+```
+Host siballe-vps
+    HostName <VPS_IP>
+    User <devname>
+```
+
+Everything else in this guide is unchanged — the commands from Section 2
+onward already use `sudo` for root-only actions (systemctl, nginx, ufw) and
+`sudo -u siballe` for app-user actions, which work identically whether you're
+logged in as `root` or as `<devname>`.
