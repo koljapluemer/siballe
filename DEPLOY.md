@@ -121,7 +121,7 @@ Choose "Yes" when prompted. This writes
 ### 1.6 App user and directories
 
 ```sh
-adduser --system --group --no-create-home --shell /usr/sbin/nologin siballe
+adduser --system --group --home /home/siballe --shell /usr/sbin/nologin siballe
 mkdir -p /opt/siballe/{app,frontend-web,backups}
 chown -R siballe:siballe /opt/siballe
 ```
@@ -135,7 +135,7 @@ non-root user the same access.
 
 ```sh
 sudo -u siballe -H bash -c 'curl -LsSf https://astral.sh/uv/install.sh | sh'
-sudo -u siballe -H bash -c '~/.local/bin/uv python install 3.14'
+sudo -u siballe -H bash -c 'cd ~ && ~/.local/bin/uv python install 3.14'
 ```
 
 `pyproject.toml` requires Python ≥3.14, which Ubuntu 24.04's `apt` doesn't ship
