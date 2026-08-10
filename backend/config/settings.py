@@ -17,6 +17,17 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = env("DJANGO_SECRET_KEY", default="django-insecure-dev-only-change-me")
 DEBUG = env("DJANGO_DEBUG")
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
+
+# Trust nginx's X-Forwarded-Proto once HTTPS is added (see DEPLOY.md's domain/HTTPS
+# appendix). Harmless while still on plain HTTP since nginx won't send this header
+# until then.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Uncomment once HTTPS is live (see DEPLOY.md):
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# SECURE_SSL_REDIRECT = True
 
 
 # Application definition

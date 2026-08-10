@@ -33,3 +33,20 @@ test:
 # Run the Flutter app against a locally running backend.
 frontend:
     cd frontend && flutter run -d chrome --web-port=5000 --dart-define=API_BASE_URL=http://localhost:8000/api
+
+# --- Production deploy (see DEPLOY.md). `host` is an alias from your ~/.ssh/config. ---
+
+# Build the Flutter web bundle for production (run locally before deploying).
+build-frontend-prod api_base_url:
+    cd frontend && flutter build web --release --dart-define=API_BASE_URL={{api_base_url}}
+
+# Sync the built frontend to the VPS (run after build-frontend-prod).
+sync-frontend-prod host:
+    rsync -avz --delete frontend/build/web/ {{host}}:/opt/siballe/frontend-web/
+
+# Pull latest code, install deps, migrate, collectstatic, restart gunicorn on the VPS.
+deploy-backend host:
+    ssh {{host}} 'cd /opt/siballe/app && git pull --ff-only && cd backend && uv sync --frozen && uv run manage.py migrate --noinput && uv run manage.py collectstatic --noinput && sudo systemctl restart gunicorn-siballe'
+
+# Full deploy: backend then frontend. Usage: just deploy siballe-vps http://VPS_IP/api
+deploy host api_base_url: (deploy-backend host) (build-frontend-prod api_base_url) (sync-frontend-prod host)

@@ -1,0 +1,12 @@
+# siballe backup timer — committed source of truth, symlinked into
+# /etc/systemd/system/backup-postgres.timer on the VPS. See DEPLOY.md.
+
+[Unit]
+Description=Run siballe Postgres backup nightly
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

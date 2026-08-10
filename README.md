@@ -43,8 +43,7 @@ Or run Flutter yourself with `flutter run --dart-define=API_BASE_URL=<backend-ur
 
 ## Deploying
 
-The backend is set up for a standard Ubuntu VPS deploy: Postgres via `DATABASE_URL`,
-static files via Whitenoise (`manage.py collectstatic`), and `gunicorn
-config.wsgi:application` as the WSGI entrypoint. Set `DJANGO_DEBUG=False` and configure
-`DJANGO_ALLOWED_HOSTS`/`DJANGO_CORS_ALLOWED_ORIGINS` via environment variables in
-production — see `backend/.env.example`.
+Both the backend and frontend deploy to a single Ubuntu VPS: nginx reverse-proxies
+to gunicorn and serves the Flutter web build as static files. See
+[`DEPLOY.md`](DEPLOY.md) for the full first-time setup, day-to-day update, and
+housekeeping guide.
