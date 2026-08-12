@@ -34,6 +34,12 @@ test:
 frontend:
     cd frontend && flutter run -d chrome --web-port=5000 --dart-define=API_BASE_URL=http://localhost:8000/api
 
+# Build a debug APK against a given backend (e.g. http://<VPS_IP>/api, or your
+# machine's LAN IP for local dev since a phone can't reach "localhost").
+# Output: frontend/build/app/outputs/flutter-apk/app-debug.apk
+build-apk-debug api_base_url:
+    cd frontend && flutter build apk --debug --dart-define=API_BASE_URL={{api_base_url}}
+
 # --- Production deploy (see DEPLOY.md). `host` is an alias from your ~/.ssh/config. ---
 
 # Build the Flutter web bundle for production (run locally before deploying).

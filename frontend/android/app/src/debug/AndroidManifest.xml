@@ -4,4 +4,9 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Debug-only: the VPS has no HTTPS yet (see DEPLOY.md), so allow plain
+         HTTP for debug builds. Release builds get no such override and stay
+         on Android's default HTTPS-only policy. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>
