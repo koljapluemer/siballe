@@ -1,12 +1,6 @@
 set dotenv-load
 
-# Auto-detect any Chrome/Chromium-family browser on this machine so flutter's
-# `-d chrome` device works without hand-editing a path per dev machine.
-# Respects a manually-set CHROME_EXECUTABLE (e.g. via .env) if present.
-_detected_chrome := `command -v google-chrome google-chrome-stable chromium chromium-browser microsoft-edge microsoft-edge-stable 2>/dev/null | head -n1`
-export CHROME_EXECUTABLE := env("CHROME_EXECUTABLE", _detected_chrome)
-
-# Run the backend (migrating first) and the Flutter frontend together.
+# Run the backend (migrating first) and the Vue frontend together.
 # Ctrl+C stops the frontend and kills the backgrounded backend server.
 dev:
     #!/usr/bin/env bash
@@ -15,7 +9,7 @@ dev:
     (cd backend && uv run manage.py runserver) &
     backend_pid=$!
     trap "kill $backend_pid 2>/dev/null" EXIT
-    cd frontend && flutter run -d chrome --web-port=5000 --dart-define=API_BASE_URL=http://localhost:8000/api
+    cd vue && npm run dev
 
 migrate:
     cd backend && uv run manage.py migrate
@@ -30,25 +24,19 @@ loaddata:
 test:
     cd backend && uv run manage.py test
 
-# Run the Flutter app against a locally running backend.
+# Run the Vue app against a locally running backend.
 frontend:
-    cd frontend && flutter run -d chrome --web-port=5000 --dart-define=API_BASE_URL=http://localhost:8000/api
-
-# Build a debug APK against a given backend (e.g. http://<VPS_IP>/api, or your
-# machine's LAN IP for local dev since a phone can't reach "localhost").
-# Output: frontend/build/app/outputs/flutter-apk/app-debug.apk
-build-apk-debug api_base_url:
-    cd frontend && flutter build apk --debug --dart-define=API_BASE_URL={{api_base_url}}
+    cd vue && npm run dev
 
 # --- Production deploy (see DEPLOY.md). `host` is an alias from your ~/.ssh/config. ---
 
-# Build the Flutter web bundle for production (run locally before deploying).
+# Build the Vue frontend bundle for production (run locally before deploying).
 build-frontend-prod api_base_url:
-    cd frontend && flutter build web --release --dart-define=API_BASE_URL={{api_base_url}}
+    cd vue && VITE_API_BASE_URL={{api_base_url}} npm run build
 
 # Sync the built frontend to the VPS (run after build-frontend-prod).
 sync-frontend-prod host:
-    rsync -avz --delete frontend/build/web/ {{host}}:/opt/siballe/frontend-web/
+    rsync -avz --delete vue/dist/ {{host}}:/opt/siballe/frontend-web/
 
 # Pull latest code, install deps, migrate, collectstatic, restart gunicorn on the VPS.
 deploy-backend host:
