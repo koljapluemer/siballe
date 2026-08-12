@@ -4,6 +4,7 @@ import 'pages/add_page.dart';
 import 'pages/learn_page.dart';
 import 'pages/profile_page.dart';
 import 'pages/situations_page.dart';
+import 'services/auth/auth_repository.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -30,12 +31,18 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
 
-  static const _pages = [
+  final _pages = [
     LearnPage(),
-    AddPage(),
-    SituationsPage(),
-    ProfilePage(),
+    const AddPage(),
+    const SituationsPage(),
+    const ProfilePage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    const AuthRepository().restoreSession();
+  }
 
   @override
   Widget build(BuildContext context) {

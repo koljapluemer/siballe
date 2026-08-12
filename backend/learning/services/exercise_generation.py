@@ -16,6 +16,7 @@ class Exercise:
     front: str
     back: str
     credits: str
+    node_id: int
 
 
 def _translation_rels(node: Node):
@@ -108,7 +109,11 @@ def build_vocab_exercise(node: Node) -> Exercise:
         credits += [example_node.credit, translation_node.credit]
 
     return Exercise(
-        kind="FlashcardVocab", front=front, back=back, credits=_collect_credits(*credits)
+        kind="FlashcardVocab",
+        front=front,
+        back=back,
+        credits=_collect_credits(*credits),
+        node_id=node.id,
     )
 
 
@@ -143,6 +148,7 @@ def build_sentence_exercise(node: Node) -> Exercise:
         front=front,
         back=back,
         credits=_collect_credits(*credits),
+        node_id=node.id,
     )
 
 
@@ -174,3 +180,27 @@ def generate_exercise_for_situation(situation: Situation) -> Exercise:
     if node.kind == Node.Kind.VOCAB:
         return build_vocab_exercise(node)
     return build_sentence_exercise(node)
+
+
+def _build_exercise(node: Node) -> Exercise:
+    if node.kind == Node.Kind.VOCAB:
+        return build_vocab_exercise(node)
+    return build_sentence_exercise(node)
+
+
+def generate_exercise_pool(
+    situations: list[Situation],
+) -> list[tuple[Exercise, set[int]]]:
+    """One Exercise per unique eligible Node across all given situations, paired
+    with the ids of every situation it's eligible under (a node can be relevant to
+    more than one situation)."""
+    situation_ids_by_node: dict[int, set[int]] = {}
+    for situation in situations:
+        for node_id in _eligible_node_ids(situation):
+            situation_ids_by_node.setdefault(node_id, set()).add(situation.id)
+
+    nodes = Node.objects.in_bulk(situation_ids_by_node.keys())
+    return [
+        (_build_exercise(nodes[node_id]), situation_ids)
+        for node_id, situation_ids in situation_ids_by_node.items()
+    ]

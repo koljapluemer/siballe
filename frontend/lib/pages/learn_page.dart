@@ -1,93 +1,95 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:fsrs/fsrs.dart' as fsrs;
 
-import '../models/exercise.dart';
-import '../services/api_client.dart';
-import '../services/exercise_repository.dart';
+import '../services/db/local_exercise_store.dart';
+import '../services/exercise_picking/default_exercise_picking_strategy.dart';
+import '../services/exercise_picking/exercise_picking_strategy.dart';
 import '../services/interest_prefs.dart';
-import '../services/situations_repository.dart';
+import '../services/sync_service.dart';
 import '../widgets/flashcard.dart';
 import '../widgets/fsrs_button_row.dart';
 
-enum _Stage { loading, empty, front, revealed, error }
+enum _Stage { loading, empty, noCandidates, front, revealed }
 
 class LearnPage extends StatefulWidget {
-  final SituationsRepository situationsRepository;
-  final ExerciseRepository exerciseRepository;
   final InterestPrefs interestPrefs;
+  final ExercisePickingStrategy pickingStrategy;
+  final LocalExerciseStore exerciseStore;
+  final SyncService syncService;
 
-  const LearnPage({
+  LearnPage({
     super.key,
-    this.situationsRepository = const SituationsRepository(),
-    this.exerciseRepository = const ExerciseRepository(),
     this.interestPrefs = const InterestPrefs(),
-  });
+    this.pickingStrategy = const DefaultExercisePickingStrategy(),
+    LocalExerciseStore? exerciseStore,
+    SyncService? syncService,
+  }) : exerciseStore = exerciseStore ?? localExerciseStore,
+       syncService = syncService ?? SyncService();
 
   @override
   State<LearnPage> createState() => _LearnPageState();
 }
 
 class _LearnPageState extends State<LearnPage> {
-  static const _maxRetries = 3;
-
   _Stage _stage = _Stage.loading;
-  Exercise? _exercise;
-  String? _errorMessage;
+  ExerciseCandidate? _candidate;
   final _random = Random();
+  final _scheduler = fsrs.Scheduler();
 
   @override
   void initState() {
     super.initState();
-    _startRound();
+    _loadThenSync();
+  }
+
+  /// Renders instantly from whatever is already cached locally, then
+  /// refreshes in the background — the point of offline-first is that the
+  /// first render never waits on the network.
+  Future<void> _loadThenSync() async {
+    await _startRound();
+    final ids = await widget.interestPrefs.getInterestedIds();
+    await widget.syncService.syncAll(interestedSituationIds: ids);
+    await _startRound();
   }
 
   Future<void> _startRound() async {
-    setState(() {
-      _stage = _Stage.loading;
-      _exercise = null;
-    });
-
-    final ids = (await widget.interestPrefs.getInterestedIds()).toList();
+    final ids = await widget.interestPrefs.getInterestedIds();
     if (ids.isEmpty) {
       if (mounted) setState(() => _stage = _Stage.empty);
       return;
     }
 
-    for (var attempt = 0; attempt < _maxRetries; attempt++) {
-      final situationId = ids[_random.nextInt(ids.length)];
-      try {
-        final exercise = await widget.exerciseRepository.generate(situationId);
-        if (mounted) {
-          setState(() {
-            _exercise = exercise;
-            _stage = _Stage.front;
-          });
-        }
-        return;
-      } on ApiException catch (e) {
-        if (e.statusCode == 404) {
-          continue; // that situation had no exercisable content, try another
-        }
-        if (mounted) {
-          setState(() {
-            _errorMessage = e.message;
-            _stage = _Stage.error;
-          });
-        }
-        return;
-      }
-    }
-
+    final candidates = await widget.exerciseStore.candidatesForSituations(ids);
+    final picked = widget.pickingStrategy.pick(candidates, DateTime.now().toUtc(), _random);
     if (mounted) {
       setState(() {
-        _errorMessage = 'No exercises available for your situations right now.';
-        _stage = _Stage.error;
+        _candidate = picked;
+        _stage = picked == null ? _Stage.noCandidates : _Stage.front;
       });
     }
   }
 
   void _reveal() => setState(() => _stage = _Stage.revealed);
+
+  Future<void> _rate(fsrs.Rating rating) async {
+    final candidate = _candidate;
+    if (candidate == null) return;
+
+    final card = candidate.card ?? fsrs.Card(cardId: candidate.exercise.id);
+    final result = _scheduler.reviewCard(card, rating);
+    await widget.exerciseStore.saveReview(candidate.exercise.id, result.card);
+
+    unawaited(
+      widget.interestPrefs.getInterestedIds().then(
+        (ids) => widget.syncService.syncAll(interestedSituationIds: ids),
+      ),
+    );
+
+    await _startRound();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,22 +114,22 @@ class _LearnPageState extends State<LearnPage> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _startRound,
-                child: const Text('Retry'),
-              ),
+              ElevatedButton(onPressed: _startRound, child: const Text('Retry')),
             ],
           ),
         );
-      case _Stage.error:
+      case _Stage.noCandidates:
         return Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(_errorMessage ?? 'Something went wrong.', textAlign: TextAlign.center),
+              const Text(
+                'No exercises are available for your situations yet.',
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _startRound, child: const Text('Retry')),
+              ElevatedButton(onPressed: _loadThenSync, child: const Text('Retry')),
             ],
           ),
         );
@@ -136,7 +138,7 @@ class _LearnPageState extends State<LearnPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Flashcard(front: _exercise!.front),
+              Flashcard(front: _candidate!.exercise.front),
               ElevatedButton(onPressed: _reveal, child: const Text('Reveal')),
             ],
           ),
@@ -147,12 +149,12 @@ class _LearnPageState extends State<LearnPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Flashcard(
-                front: _exercise!.front,
-                back: _exercise!.back,
-                credits: _exercise!.credits,
+                front: _candidate!.exercise.front,
+                back: _candidate!.exercise.back,
+                credits: _candidate!.exercise.credits,
               ),
               const SizedBox(height: 16),
-              FsrsButtonRow(onAnswer: _startRound),
+              FsrsButtonRow(onRate: _rate),
               const SizedBox(height: 16),
             ],
           ),

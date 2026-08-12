@@ -13,4 +13,15 @@ class ExerciseRepository {
     );
     return Exercise.fromJson(data as Map<String, dynamic>);
   }
+
+  Future<List<ExercisePoolEntry>> pool(Set<int> situationIds) async {
+    final data = await _client.get(
+      '/exercises/pool/',
+      query: {'situation_ids': situationIds.join(',')},
+    );
+    final results = (data as Map<String, dynamic>)['results'] as List;
+    return results
+        .map((e) => ExercisePoolEntry.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
 }

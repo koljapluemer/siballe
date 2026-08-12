@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 
 
 class User(AbstractUser):
@@ -8,3 +9,5 @@ class User(AbstractUser):
     operation, so this thin subclass exists from migration 0001 even though it adds
     no fields yet.
     """
+
+    email = models.EmailField("email address", blank=True, unique=True)
