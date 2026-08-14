@@ -1,0 +1,13 @@
+[project]
+name = "cms"
+version = "0.1.0"
+description = "Curation tool for siballe's phrase content"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "streamlit>=1.59.1",
+    "pillow>=12.3.0",
+    "pycountry>=26.2.16",
+    "python-dotenv>=1.2.2",
+    "requests>=2.34.2",
+]

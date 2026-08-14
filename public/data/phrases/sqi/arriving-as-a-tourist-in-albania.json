@@ -1,0 +1,29 @@
+{
+  "Hello": {
+    "expressions": {
+      "Tungjatjeta": {
+        "note": "formal"
+      },
+      "Tjeta": {
+        "note": "informal"
+      }
+    }
+  },
+  "[getting someone's attention]": {
+    "expressions": {
+      "Më falni.": {}
+    }
+  },
+  "Goodbye": {
+    "expressions": {
+      "Shëndet": {
+        "note": "informal"
+      }
+    }
+  },
+  "Thank you": {
+    "expressions": {
+      "Faleminderit": {}
+    }
+  }
+}
