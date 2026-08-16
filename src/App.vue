@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { BarChart3, MessageCircle, Settings } from 'lucide-vue-next'
+import { BarChart3, Settings } from 'lucide-vue-next'
 
 const route = useRoute()
 
 const tabs = [
-  { routeName: 'practice', label: 'Practice', icon: MessageCircle },
   { routeName: 'stats', label: 'Stats', icon: BarChart3 },
   { routeName: 'settings', label: 'Settings', icon: Settings }
 ]
@@ -15,7 +14,7 @@ const tabs = [
   <div class="min-h-screen w-full text-base-content">
     <div class="pointer-events-none fixed inset-x-0 top-0 z-50 flex items-start justify-between gap-2 p-3">
       <router-link
-        :to="{ name: 'info' }"
+        :to="{ name: 'home' }"
         class="pointer-events-auto flex items-center gap-2 rounded-box border border-base-300 bg-base-100/90 px-3 py-2 font-semibold shadow-sm backdrop-blur"
       >
         siballe

@@ -5,17 +5,18 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'info',
-      component: () => import('./pages/info/PageInfo.vue'),
+      name: 'home',
+      component: () => import('./pages/home/PageHome.vue'),
       meta: {
         title: 'siballe',
         description: 'Memorize core phrases for everyday situations, by target language.'
       }
     },
     {
-      path: '/practice',
+      path: '/practice/:languageCode/:situationSlug',
       name: 'practice',
       component: () => import('./pages/practice/PagePractice.vue'),
+      props: true,
       meta: {
         title: 'Practice | siballe',
         description: 'Practice target-language phrases by situation with FSRS spaced repetition.'
