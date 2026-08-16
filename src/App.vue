@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { BarChart3, Settings } from 'lucide-vue-next'
+import UpdatePrompt from '@/dumb/pwa/UpdatePrompt.vue'
 
 const route = useRoute()
 
@@ -43,5 +44,7 @@ const tabs = [
     <main class="flex w-full min-h-screen justify-center bg-base-200/40 px-4 pb-8 pt-20">
       <RouterView />
     </main>
+
+    <UpdatePrompt />
   </div>
 </template>
