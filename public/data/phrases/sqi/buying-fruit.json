@@ -1,5 +1,116 @@
 {
-  "300": {
-    "expressions": {}
+  "[getting someone's attention]": {
+    "expressions": {
+      "Më falni.": {}
+    }
+  },
+  "How much is this?": {
+    "expressions": {
+      "Sa kushton kjo?": {}
+    }
+  },
+  "How much per kilo?": {
+    "expressions": {
+      "Sa kushton një kile?": {
+        "note": "Kile is the common everyday word for kilogram."
+      }
+    }
+  },
+  "I want this / these": {
+    "expressions": {
+      "Dua këtë.": {
+        "note": "this one"
+      },
+      "Dua këto.": {
+        "note": "these"
+      }
+    }
+  },
+  "That / those": {
+    "expressions": {
+      "Atë.": {
+        "note": "that one"
+      },
+      "Ato.": {
+        "note": "those"
+      }
+    }
+  },
+  "Give me...": {
+    "expressions": {
+      "Më jepni...": {
+        "note": "polite; follow with amount/item"
+      }
+    }
+  },
+  "One kilo": {
+    "expressions": {
+      "Një kile.": {}
+    }
+  },
+  "Half a kilo": {
+    "expressions": {
+      "Gjysmë kile.": {}
+    }
+  },
+  "Two kilos": {
+    "expressions": {
+      "Dy kile.": {}
+    }
+  },
+  "Three kilos": {
+    "expressions": {
+      "Tre kile.": {}
+    }
+  },
+  "A little": {
+    "expressions": {
+      "Pak.": {}
+    }
+  },
+  "A little more": {
+    "expressions": {
+      "Edhe pak.": {}
+    }
+  },
+  "That's enough": {
+    "expressions": {
+      "Mjaft.": {}
+    }
+  },
+  "Also this": {
+    "expressions": {
+      "Edhe këtë.": {}
+    }
+  },
+  "Are they ripe?": {
+    "expressions": {
+      "Janë të pjekura?": {}
+    }
+  },
+  "Are they good?": {
+    "expressions": {
+      "Janë të mira?": {}
+    }
+  },
+  "Can I try one?": {
+    "expressions": {
+      "Mund ta provoj?": {}
+    }
+  },
+  "A bag, please": {
+    "expressions": {
+      "Një qese, ju lutem.": {}
+    }
+  },
+  "No bag": {
+    "expressions": {
+      "Pa qese.": {}
+    }
+  },
+  "That's all": {
+    "expressions": {
+      "Vetëm kaq.": {}
+    }
   }
 }
