@@ -25,6 +25,13 @@ export async function rateGoal(id: string, existing: Card | undefined, rating: G
   await db.schedules.put({ ...card, id })
 }
 
+// Starts scheduling a goal the learner has just seen for the first time -
+// an unrated FSRS card, since a "listen and repeat" exercise has nothing to
+// grade.
+export async function initGoal(id: string): Promise<void> {
+  await db.schedules.put({ ...createEmptyCard(new Date()), id })
+}
+
 // Distinct (language, situation) pairs the user has already practiced at
 // least once, each with when it was last reviewed - feeds the home
 // screen's "jump back in" cards.

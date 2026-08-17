@@ -5,7 +5,7 @@ import { computed, onMounted, ref } from 'vue'
 import { Rating, type Card } from 'ts-fsrs'
 import { logTrial } from '../../entities/activity/activityLog'
 import { getSituationGoals, type PhraseGoal } from '../../entities/phrase-catalog/phraseCatalog'
-import { getSchedules, goalCardId, rateGoal } from '../../entities/phrase-schedule/phraseSchedule'
+import { getSchedules, goalCardId, initGoal, rateGoal } from '../../entities/phrase-schedule/phraseSchedule'
 
 export type LessonExercise = { goal: PhraseGoal; id: string; schedule: Card | undefined }
 
@@ -61,12 +61,7 @@ export function useLesson(languageCode: string, situationSlug: string) {
     loading.value = false
   }
 
-  async function rate(kind: 'correct' | 'wrong'): Promise<void> {
-    const exercise = current.value
-    if (!exercise) return
-    if (kind === 'correct') correctCount.value += 1
-    await rateGoal(exercise.id, exercise.schedule, kind === 'correct' ? Rating.Good : Rating.Again)
-    await logTrial()
+  function advance(): void {
     if (index.value + 1 < exercises.value.length) {
       index.value += 1
     } else {
@@ -74,7 +69,26 @@ export function useLesson(languageCode: string, situationSlug: string) {
     }
   }
 
+  async function rate(kind: 'correct' | 'wrong'): Promise<void> {
+    const exercise = current.value
+    if (!exercise) return
+    if (kind === 'correct') correctCount.value += 1
+    await rateGoal(exercise.id, exercise.schedule, kind === 'correct' ? Rating.Good : Rating.Again)
+    await logTrial()
+    advance()
+  }
+
+  // For an exercise on content never seen before: acknowledges it was shown
+  // without grading recall, since there's nothing to score yet.
+  async function acknowledge(): Promise<void> {
+    const exercise = current.value
+    if (!exercise) return
+    await initGoal(exercise.id)
+    await logTrial()
+    advance()
+  }
+
   onMounted(build)
 
-  return { loading, current, index, total, correctCount, finished, rate, restart: build }
+  return { loading, current, index, total, correctCount, finished, rate, acknowledge, restart: build }
 }

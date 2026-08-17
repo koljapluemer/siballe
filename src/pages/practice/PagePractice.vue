@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowLeft, PartyPopper, ThumbsDown, ThumbsUp } from 'lucide-vue-next'
-import ExpressionButtons from '../../dumb/ExpressionButtons.vue'
-import { getExpressionAudioUrl, getLanguages, getSituations } from '../../entities/phrase-catalog/phraseCatalog'
+import { ArrowLeft, PartyPopper } from 'lucide-vue-next'
+import { getLanguages, getSituations } from '../../entities/phrase-catalog/phraseCatalog'
+import NewPhraseExercise from './NewPhraseExercise.vue'
+import ReviewExercise from './ReviewExercise.vue'
 import { useActiveTime } from './useActiveTime'
 import { useLesson } from './useLesson'
 
@@ -15,6 +16,7 @@ useActiveTime()
 const languageName = ref('')
 const situationName = ref('')
 const feedback = ref<'correct' | 'wrong' | null>(null)
+const acknowledged = ref(false)
 const lesson = useLesson(props.languageCode, props.situationSlug)
 
 onMounted(async () => {
@@ -30,6 +32,14 @@ async function handleRate(kind: 'correct' | 'wrong'): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 250))
   await lesson.rate(kind)
   feedback.value = null
+}
+
+async function handleAcknowledge(): Promise<void> {
+  if (acknowledged.value) return
+  acknowledged.value = true
+  await new Promise((resolve) => setTimeout(resolve, 250))
+  await lesson.acknowledge()
+  acknowledged.value = false
 }
 
 function goHome(): void {
@@ -124,53 +134,23 @@ function goHome(): void {
       name="phrase-swap"
       mode="out-in"
     >
-      <div
+      <ReviewExercise
+        v-if="lesson.current.value.schedule"
         :key="lesson.current.value.id"
-        class="card w-full shadow-xl"
-      >
-        <div class="card-body items-center gap-4 text-center">
-          <span class="badge badge-primary badge-outline">
-            Try to express this in {{ languageName }}
-          </span>
-
-          <p class="text-2xl font-semibold">
-            {{ lesson.current.value.goal.key }}
-          </p>
-
-          <div class="flex w-full flex-col gap-3">
-            <ExpressionButtons
-              v-for="expression in lesson.current.value.goal.expressions"
-              :key="expression.text"
-              :text="expression.text"
-              :note="expression.note"
-              :audio-url="getExpressionAudioUrl(languageCode, expression.text)"
-            />
-          </div>
-
-          <div class="flex justify-center gap-6 pt-2">
-            <button
-              type="button"
-              class="btn btn-circle btn-lg"
-              :class="feedback === 'wrong' ? 'btn-error' : 'btn-outline'"
-              :disabled="feedback !== null"
-              aria-label="Wrong"
-              @click="handleRate('wrong')"
-            >
-              <ThumbsDown />
-            </button>
-            <button
-              type="button"
-              class="btn btn-circle btn-lg"
-              :class="feedback === 'correct' ? 'btn-success' : 'btn-outline'"
-              :disabled="feedback !== null"
-              aria-label="Correct"
-              @click="handleRate('correct')"
-            >
-              <ThumbsUp />
-            </button>
-          </div>
-        </div>
-      </div>
+        :language-code="languageCode"
+        :language-name="languageName"
+        :goal="lesson.current.value.goal"
+        :feedback="feedback"
+        @rate="handleRate"
+      />
+      <NewPhraseExercise
+        v-else
+        :key="lesson.current.value.id"
+        :language-code="languageCode"
+        :goal="lesson.current.value.goal"
+        :acknowledged="acknowledged"
+        @acknowledge="handleAcknowledge"
+      />
     </Transition>
   </div>
 </template>
